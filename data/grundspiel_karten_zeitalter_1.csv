@@ -1,0 +1,24 @@
+name,farbe,typ,kosten,produziert,effekt,symbol
+Holzplatz,Braun,Rohstoffgebäude,-,Holz,,
+Holzfällerlager,Braun,Rohstoffgebäude,1 Münze,Holz,,
+Ziegelei,Braun,Rohstoffgebäude,-,Lehm,,
+Tongrube,Braun,Rohstoffgebäude,1 Münze,Lehm,,
+Steinbruch,Braun,Rohstoffgebäude,-,Stein,,
+Gesteinslagerstätte,Braun,Rohstoffgebäude,1 Münze,Stein,,
+Glashütte,Grau,Manufakturgebäude,1 Münze,Glas,,
+Papyrusfertigung,Grau,Manufakturgebäude,1 Münze,Papyrus,,
+Wachturm,Rot,Militärgebäude,-,,+1 Schild,
+Kaserne,Rot,Militärgebäude,1 Lehm,,+1 Schild,
+Stall,Rot,Militärgebäude,1 Holz 1 Lehm,,+1 Schild,Hufeisen
+Garnison,Rot,Militärgebäude,2 Lehm,,+1 Schild,Schwert
+Palisade,Rot,Militärgebäude,2 Münzen,,+1 Schild,
+Werkstatt,Grün,Wissenschaftsgebäude,1 Stein,,,Zirkel
+Apotheke,Grün,Wissenschaftsgebäude,-,,,Mörser
+Skriptorium,Grün,Wissenschaftsgebäude,2 Münzen,,,Feder
+Drogerie,Grün,Wissenschaftsgebäude,2 Münzen,,,Zahnrad
+Theater,Blau,Zivilgebäude,-,,+3 Punkte,Maske
+Altar,Blau,Zivilgebäude,-,,+3 Punkte,Mond
+Bäder,Blau,Zivilgebäude,1 Stein,,+3 Punkte,Wasser
+Steinlager,Gelb,Handelsgebäude,3 Münzen,,Stein-Rabatt,
+Tonlager,Gelb,Handelsgebäude,3 Münzen,,Lehm-Rabatt,
+Holzlager,Gelb,Handelsgebäude,3 Münzen,,Holz-Rabatt,
