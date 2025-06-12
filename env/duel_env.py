@@ -81,6 +81,48 @@ class DuelResourceEnv(Env):
                 obs[card["id"]] = 1
         return obs
 
+    
+    def step(self, action):
+        # Gültige Aktionen berechnen
+        valid_actions = [
+            card["id"]
+            for card in self.board
+            if card["open"] and card["id"] not in self.collected_indices
+        ]
+
+        if self.done:
+            if self.verbose:
+                logging.warning("Aktion nach Spielende ausgeführt.")
+            return self._get_obs(), -1, True, {"valid_actions": valid_actions}
+
+        if action not in valid_actions:
+            if self.verbose:
+                logging.warning(f"Ungültige Aktion: {action}")
+            return self._get_obs(), -1, self.done, {"valid_actions": valid_actions}
+
+        self.collected_indices.append(action)
+
+        # ggf. neue Karten aufdecken
+        for b in self.board:
+            if action in b.get("covered_by", []):
+                b["covered_by"].remove(action)
+                if not b["covered_by"]:
+                    b["open"] = True
+
+        self.done = len(self.collected_indices) == self.num_cards
+        card_data = self.card_data[action]
+        reward = 1 if card_data.get("typ") == "Rohstoffgebäude" else 0
+
+        if self.verbose:
+            logging.info(f"Zug: {card_data['name']} ({card_data['typ']}) → Reward: {reward}")
+
+        return self._get_obs(), reward, self.done, {
+            "karte": card_data["name"],
+            "typ": card_data["typ"],
+            "valid_actions": valid_actions
+        }
+
+    
     def step(self, action):
         if self.done:
             if self.verbose:
@@ -109,6 +151,20 @@ class DuelResourceEnv(Env):
         if self.verbose:
             logging.info(f"Zug: {card_data['name']} ({card_data['typ']}) → Reward: {reward}")
 
-        return self._get_obs(), reward, self.done, {"karte": card_data["name"], "typ": card_data["typ"]}
+            return self._get_obs(), reward, self.done, {"karte": card_data["name"], "typ": card_data["typ"]}
+    
+    def render_board(self):
+        """Zeigt das aktuelle Zeitalter-I-Spielfeld im Binärstil im Terminal"""
+        layout = [[] for _ in self.structure]
+        for card in self.board:
+            row = card["row"]
+            visible = int(card["open"] and card["id"] not in self.collected_indices)
+            layout[row].append(visible)
+
+        print("\n🧩 Aktuelles Zeitalter-I-Layout:")
+        for row_index, row in enumerate(layout):
+            row_str = " ".join(map(str, row))
+            print(f"Zeile {row_index}: {row_str}")
+
 
     
