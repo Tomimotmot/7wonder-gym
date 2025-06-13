@@ -20,6 +20,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   font-weight: bold;
   font-size: 0.9rem;
   text-align: center;
@@ -28,6 +29,7 @@
   background-color: #f3f3f3;
   color: #333;
   padding: 0.5rem;
+  cursor: pointer;
 }
 
 .karte.offen {
@@ -42,30 +44,37 @@
   color: transparent;
 }
 
-.karte.verdeckt .kartenname {
-  visibility: hidden;
-}
-
+.karte.verdeckt .kartenname,
 .karte.verdeckt .karte-produziert {
   visibility: hidden;
 }
 
-.karte.verdeckt {
-  background-color: #ccc;
-  border: 2px solid #888;
+.karte.gezogen {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
+/* Oben: produziert */
 .karte-produziert {
   font-size: 0.8rem;
   font-weight: bold;
   color: #333;
-  height: 1rem;
+  position: absolute;
+  top: 5px;
 }
 
+/* Unten: Name */
 .kartenname {
   font-size: 0.75rem;
   padding: 0 0.3rem;
   color: #000;
   white-space: pre-wrap;
-  height: 1rem;
+  text-align: center;
+  position: absolute;
+  bottom: 5px;
+}
+
+.belohnung {
+  margin-top: 1rem;
+  font-size: 1.2rem;
 }
