@@ -1,0 +1,209 @@
+[
+  {
+    "name": "Holzplatz",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "-",
+    "produziert": "Holz",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Holzfällerlager",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "1 Münze",
+    "produziert": "Holz",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Ziegelei",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "-",
+    "produziert": "Lehm",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Tongrube",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "1 Münze",
+    "produziert": "Lehm",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Steinbruch",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "-",
+    "produziert": "Stein",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Gesteinslagerstätte",
+    "farbe": "Braun",
+    "typ": "Rohstoffgebäude",
+    "kosten": "1 Münze",
+    "produziert": "Stein",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Glashütte",
+    "farbe": "Grau",
+    "typ": "Manufakturgebäude",
+    "kosten": "1 Münze",
+    "produziert": "Glas",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Papyrusfertigung",
+    "farbe": "Grau",
+    "typ": "Manufakturgebäude",
+    "kosten": "1 Münze",
+    "produziert": "Papyrus",
+    "effekt": "",
+    "symbol": ""
+  },
+  {
+    "name": "Wachturm",
+    "farbe": "Rot",
+    "typ": "Militärgebäude",
+    "kosten": "-",
+    "produziert": "",
+    "effekt": "+1 Schild",
+    "symbol": ""
+  },
+  {
+    "name": "Kaserne",
+    "farbe": "Rot",
+    "typ": "Militärgebäude",
+    "kosten": "1 Lehm",
+    "produziert": "",
+    "effekt": "+1 Schild",
+    "symbol": ""
+  },
+  {
+    "name": "Stall",
+    "farbe": "Rot",
+    "typ": "Militärgebäude",
+    "kosten": "1 Holz 1 Lehm",
+    "produziert": "",
+    "effekt": "+1 Schild",
+    "symbol": "Hufeisen"
+  },
+  {
+    "name": "Garnison",
+    "farbe": "Rot",
+    "typ": "Militärgebäude",
+    "kosten": "2 Lehm",
+    "produziert": "",
+    "effekt": "+1 Schild",
+    "symbol": "Schwert"
+  },
+  {
+    "name": "Palisade",
+    "farbe": "Rot",
+    "typ": "Militärgebäude",
+    "kosten": "2 Münzen",
+    "produziert": "",
+    "effekt": "+1 Schild",
+    "symbol": ""
+  },
+  {
+    "name": "Werkstatt",
+    "farbe": "Grün",
+    "typ": "Wissenschaftsgebäude",
+    "kosten": "1 Stein",
+    "produziert": "",
+    "effekt": "",
+    "symbol": "Zirkel"
+  },
+  {
+    "name": "Apotheke",
+    "farbe": "Grün",
+    "typ": "Wissenschaftsgebäude",
+    "kosten": "-",
+    "produziert": "",
+    "effekt": "",
+    "symbol": "Mörser"
+  },
+  {
+    "name": "Skriptorium",
+    "farbe": "Grün",
+    "typ": "Wissenschaftsgebäude",
+    "kosten": "2 Münzen",
+    "produziert": "",
+    "effekt": "",
+    "symbol": "Feder"
+  },
+  {
+    "name": "Drogerie",
+    "farbe": "Grün",
+    "typ": "Wissenschaftsgebäude",
+    "kosten": "2 Münzen",
+    "produziert": "",
+    "effekt": "",
+    "symbol": "Zahnrad"
+  },
+  {
+    "name": "Theater",
+    "farbe": "Blau",
+    "typ": "Zivilgebäude",
+    "kosten": "-",
+    "produziert": "",
+    "effekt": "+3 Punkte",
+    "symbol": "Maske"
+  },
+  {
+    "name": "Altar",
+    "farbe": "Blau",
+    "typ": "Zivilgebäude",
+    "kosten": "-",
+    "produziert": "",
+    "effekt": "+3 Punkte",
+    "symbol": "Mond"
+  },
+  {
+    "name": "Bäder",
+    "farbe": "Blau",
+    "typ": "Zivilgebäude",
+    "kosten": "1 Stein",
+    "produziert": "",
+    "effekt": "+3 Punkte",
+    "symbol": "Wasser"
+  },
+  {
+    "name": "Steinlager",
+    "farbe": "Gelb",
+    "typ": "Handelsgebäude",
+    "kosten": "3 Münzen",
+    "produziert": "",
+    "effekt": "Stein-Rabatt",
+    "symbol": ""
+  },
+  {
+    "name": "Tonlager",
+    "farbe": "Gelb",
+    "typ": "Handelsgebäude",
+    "kosten": "3 Münzen",
+    "produziert": "",
+    "effekt": "Lehm-Rabatt",
+    "symbol": ""
+  },
+  {
+    "name": "Holzlager",
+    "farbe": "Gelb",
+    "typ": "Handelsgebäude",
+    "kosten": "3 Münzen",
+    "produziert": "",
+    "effekt": "Holz-Rabatt",
+    "symbol": ""
+  }
+]
