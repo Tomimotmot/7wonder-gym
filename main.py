@@ -1,17 +1,16 @@
 import streamlit as st
 import json
 
-# ----------------------------------------
-# Kartenlayout: Zeilen von oben nach unten (2-3-4-5-6 Karten = 20 Karten)
+# --- Zeitalter-I Struktur: Kartenreihen (2–3–4–5–6)
 karten_layout = [
-    [0, 1],                      # Reihe 0 (oben)
-    [2, 3, 4],                   # Reihe 1
-    [5, 6, 7, 8],                # Reihe 2
-    [9, 10, 11, 12, 13],         # Reihe 3
-    [14, 15, 16, 17, 18, 19]     # Reihe 4 (unten)
+    [0, 1],                      # 2 Karten
+    [2, 3, 4],                   # 3 Karten
+    [5, 6, 7, 8],                # 4 Karten
+    [9, 10, 11, 12, 13],         # 5 Karten
+    [14, 15, 16, 17, 18, 19]     # 6 Karten
 ]
 
-# Mapping: Rohstoffsymbol
+# Rohstoff-Symbole (optional anpassbar)
 ressourcen_kürzel = {
     "Holz": "H",
     "Stein": "S",
@@ -20,32 +19,29 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
-# ----------------------------------------
-# JSON-Daten laden
+# Karten-Daten laden
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
-# ----------------------------------------
-# Session-State initialisieren
+# --- Session State
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
 def karte_ziehen(karten_id):
-    karte = karten_data[karten_id]
     st.session_state.gezogen.add(karten_id)
+    karte = karten_data[karten_id]
     st.session_state.last_reward = karte.get("produziert", "❌ nichts")
 
-# ----------------------------------------
-# Stildefinition einmalig einbinden
+# --- CSS für saubere Kartendarstellung
 st.markdown("""
 <style>
 .kartenreihe {
     display: flex;
     justify-content: center;
     margin-bottom: 1.2rem;
-    gap: 0.6rem;
+    gap: 0.5rem;
 }
 .karte {
     width: 100px;
@@ -60,6 +56,7 @@ st.markdown("""
     padding: 6px;
     text-align: center;
     font-size: 0.75rem;
+    transition: all 0.2s ease;
 }
 .offen {
     background-color: #fffdf5;
@@ -71,7 +68,6 @@ st.markdown("""
     background-color: #bbb;
     border: 2px solid #888;
     color: transparent;
-    cursor: default;
 }
 .gezogen {
     opacity: 0.3;
@@ -92,54 +88,42 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------
-# Anzeige
-st.title("🎴 Zeitalter I – Kartenpyramide (2–3–4–5–6)")
+# --- Überschrift
+st.markdown("## 🟥 Zeitalter I – Kartenpyramide (2–3–4–5–6)")
 
-# Karten anzeigen – jede Reihe zentriert
+# --- Kartenanzeige
 for row in karten_layout:
     st.markdown('<div class="kartenreihe">', unsafe_allow_html=True)
     for karten_id in row:
         karte = karten_data[karten_id]
         gezogen = karten_id in st.session_state.gezogen
-
-        # Anzeige vorbereiten
         rohstoff = karte.get("produziert", "")
         symbol = ressourcen_kürzel.get(rohstoff, "")
-        klassennamen = ["karte", "offen"]
-        if gezogen:
-            klassennamen.append("gezogen")
 
-        # HTML-Ausgabe pro Karte
+        # Klassennamen für Styling
+        klassen = ["karte", "offen"]
         if gezogen:
-            st.markdown(f"""
-            <div class="{' '.join(klassennamen)}">
-                <div class="kartenressource">{symbol}</div>
-                <div class="kartenname">{karte['name']}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            # Jede Karte bekommt einen eigenen Button
-            if st.button(f"{karte['name']}", key=f"karte_{karten_id}"):
+            klassen.append("gezogen")
+
+        # Anzeige mit JS-free Button (nur HTML + Streamlit-Button-Trick)
+        container = st.empty()
+        if not gezogen:
+            if container.button(" ", key=f"karte_{karten_id}"):
                 karte_ziehen(karten_id)
 
-            # Danach nochmal als gestylter Kasten anzeigen
-            st.markdown(f"""
-            <div class="{' '.join(klassennamen)}">
-                <div class="kartenressource">{symbol}</div>
-                <div class="kartenname">{karte['name']}</div>
-            </div>
-            """, unsafe_allow_html=True)
+        container.markdown(f"""
+        <div class="{' '.join(klassen)}">
+            <div class="kartenressource">{symbol}</div>
+            <div class="kartenname">{karte['name']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ----------------------------------------
-# Letzter Reward
+# --- Letzter Reward
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# ----------------------------------------
-# Reset-Button
+# --- Reset
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen = set()
     st.session_state.last_reward = None
