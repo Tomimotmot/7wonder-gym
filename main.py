@@ -21,7 +21,8 @@ offenLayout = [
 
 # 💾 JSON-Datei laden
 json_path = os.path.join("data", "grundspiel_karten_zeitalter_1.json")
-with open(json_path, "r", encoding="utf-8") as f:
+# Wenn JSON im gleichen Ordner wie main.py liegt
+with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
 # 🧠 Session-State initialisieren
