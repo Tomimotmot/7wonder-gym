@@ -1,16 +1,17 @@
 import streamlit as st
 import json
 
-# --- Zeitalter-I Struktur: Kartenreihen (2–3–4–5–6)
+# ----------------------------------------
+# Kartenlayout: Zeilen von oben nach unten (2–3–4–5–6 = 20 Karten)
 karten_layout = [
-    [0, 1],                      # 2 Karten
+    [0, 1],                      # 2 Karten oben
     [2, 3, 4],                   # 3 Karten
     [5, 6, 7, 8],                # 4 Karten
     [9, 10, 11, 12, 13],         # 5 Karten
-    [14, 15, 16, 17, 18, 19]     # 6 Karten
+    [14, 15, 16, 17, 18, 19]     # 6 Karten unten
 ]
 
-# Rohstoff-Symbole (optional anpassbar)
+# Rohstoff-Symbole (Initialen)
 ressourcen_kürzel = {
     "Holz": "H",
     "Stein": "S",
@@ -19,29 +20,33 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
+# ----------------------------------------
 # Karten-Daten laden
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
-# --- Session State
+# ----------------------------------------
+# Session State
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
+# Karte ziehen
 def karte_ziehen(karten_id):
     st.session_state.gezogen.add(karten_id)
     karte = karten_data[karten_id]
     st.session_state.last_reward = karte.get("produziert", "❌ nichts")
 
-# --- CSS für saubere Kartendarstellung
+# ----------------------------------------
+# CSS-Styling
 st.markdown("""
 <style>
 .kartenreihe {
     display: flex;
     justify-content: center;
     margin-bottom: 1.2rem;
-    gap: 0.5rem;
+    gap: 0.6rem;
 }
 .karte {
     width: 100px;
@@ -56,18 +61,12 @@ st.markdown("""
     padding: 6px;
     text-align: center;
     font-size: 0.75rem;
-    transition: all 0.2s ease;
 }
 .offen {
     background-color: #fffdf5;
     border: 2px solid #4caf50;
     color: #000;
     cursor: pointer;
-}
-.verdeckt {
-    background-color: #bbb;
-    border: 2px solid #888;
-    color: transparent;
 }
 .gezogen {
     opacity: 0.3;
@@ -88,43 +87,46 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Überschrift
+# ----------------------------------------
+# Titel
 st.markdown("## 🟥 Zeitalter I – Kartenpyramide (2–3–4–5–6)")
 
-# --- Kartenanzeige
+# ----------------------------------------
+# Kartenanzeige
 for row in karten_layout:
-    st.markdown('<div class="kartenreihe">', unsafe_allow_html=True)
-    for karten_id in row:
+    num_cards = len(row)
+    total_slots = 12
+    padding = (total_slots - num_cards) // 2
+    cols = st.columns(total_slots, gap="small")
+
+    for i, karten_id in enumerate(row):
         karte = karten_data[karten_id]
         gezogen = karten_id in st.session_state.gezogen
         rohstoff = karte.get("produziert", "")
         symbol = ressourcen_kürzel.get(rohstoff, "")
-
-        # Klassennamen für Styling
-        klassen = ["karte", "offen"]
+        klassennamen = ["karte", "offen"]
         if gezogen:
-            klassen.append("gezogen")
+            klassennamen.append("gezogen")
 
-        # Anzeige mit JS-free Button (nur HTML + Streamlit-Button-Trick)
-        container = st.empty()
-        if not gezogen:
-            if container.button(" ", key=f"karte_{karten_id}"):
-                karte_ziehen(karten_id)
+        with cols[padding + i]:
+            if not gezogen:
+                if st.button(" ", key=f"karte_{karten_id}"):
+                    karte_ziehen(karten_id)
 
-        container.markdown(f"""
-        <div class="{' '.join(klassen)}">
-            <div class="kartenressource">{symbol}</div>
-            <div class="kartenname">{karte['name']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="{' '.join(klassennamen)}">
+                <div class="kartenressource">{symbol}</div>
+                <div class="kartenname">{karte['name']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-# --- Letzter Reward
+# ----------------------------------------
+# Reward & Reset
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# --- Reset
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen = set()
     st.session_state.last_reward = None
     st.experimental_rerun()
+        
