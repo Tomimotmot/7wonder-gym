@@ -1,11 +1,4 @@
-- **Noch ohne:** Abhängigkeiten / Blockierer
-- **Fokus jetzt:** Visuelle Darstellung des echten 2–3–4–5–6-Aufbaus in Streamlit
 
----
-
-## ✅ Komplettes Streamlit-Skript (zentriert & klickbar)
-
-```python
 import streamlit as st
 import json
 
