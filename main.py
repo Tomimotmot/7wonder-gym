@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 
-# ----------------------------------------
 # Kartenlayout: Zeilen von oben nach unten (2–3–4–5–6)
 karten_layout = [
     [0, 1],
@@ -11,7 +10,6 @@ karten_layout = [
     [14, 15, 16, 17, 18, 19]
 ]
 
-# Rohstoff-Symbole (Initialen)
 ressourcen_kürzel = {
     "Holz": "H",
     "Stein": "S",
@@ -20,26 +18,23 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
-# ----------------------------------------
 # Karten-Daten laden
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
-# ----------------------------------------
-# Session State
+# Session-State initialisieren
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
-# Karte ziehen
 def karte_ziehen(karten_id):
     st.session_state.gezogen.add(karten_id)
     karte = karten_data[karten_id]
     st.session_state.last_reward = karte.get("produziert", "❌ nichts")
 
-# ----------------------------------------
-# CSS für saubere Darstellung
+# CSS-Styling
+st.set_page_config(page_title="7 Wonders Duel", layout="wide")
 st.markdown("""
 <style>
 .karten-auslage {
@@ -91,14 +86,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------
 # Titel
-st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (mobilfreundlich)")
+st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (2–3–4–5–6)")
 
-# ----------------------------------------
 # Kartenanzeige
 st.markdown('<div class="karten-auslage">', unsafe_allow_html=True)
-
 for row in karten_layout:
     st.markdown('<div class="reihe">', unsafe_allow_html=True)
     for karten_id in row:
@@ -110,29 +102,25 @@ for row in karten_layout:
         if gezogen:
             css_classes.append("gezogen")
 
-        # Klickbare Karte mit form
-        with st.form(key=f"form_{karten_id}"):
-            submit = st.form_submit_button(" ")
-            if submit and not gezogen:
+        with st.form(key=f"karte_{karten_id}"):
+            clicked = st.form_submit_button(" ")
+            if clicked and not gezogen:
                 karte_ziehen(karten_id)
 
             st.markdown(f"""
-            <div class="{' '.join(css_classes)}">
-                <div class="kartenressource">{symbol}</div>
-                <div class="kartenname">{karte['name']}</div>
-            </div>
+                <div class="{' '.join(css_classes)}">
+                    <div class="kartenressource">{symbol}</div>
+                    <div class="kartenname">{karte['name']}</div>
+                </div>
             """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ----------------------------------------
 # Letzter Reward
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# ----------------------------------------
-# Reset-Button
+# Reset
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen = set()
     st.session_state.last_reward = None
