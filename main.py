@@ -1,16 +1,17 @@
 import streamlit as st
 import json
 
-# Kartenlayout: von oben nach unten
+# ----------------------------------------
+# Kartenlayout: Zeilen von oben nach unten (2–3–4–5–6)
 karten_layout = [
-    [0, 1],                      # 2 Karten
-    [2, 3, 4],                   # 3 Karten
-    [5, 6, 7, 8],                # 4 Karten
-    [9, 10, 11, 12, 13],         # 5 Karten
-    [14, 15, 16, 17, 18, 19]     # 6 Karten
+    [0, 1],
+    [2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12, 13],
+    [14, 15, 16, 17, 18, 19]
 ]
 
-# Rohstoff-Symbole
+# Rohstoff-Symbole (Initialen)
 ressourcen_kürzel = {
     "Holz": "H",
     "Stein": "S",
@@ -19,10 +20,12 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
+# ----------------------------------------
 # Karten-Daten laden
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
+# ----------------------------------------
 # Session State
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
@@ -35,7 +38,8 @@ def karte_ziehen(karten_id):
     karte = karten_data[karten_id]
     st.session_state.last_reward = karte.get("produziert", "❌ nichts")
 
-# CSS einfügen (wie in React-Layout)
+# ----------------------------------------
+# CSS für saubere Darstellung
 st.markdown("""
 <style>
 .karten-auslage {
@@ -49,6 +53,7 @@ st.markdown("""
     display: flex;
     justify-content: center;
     gap: 0.7rem;
+    flex-wrap: nowrap;
 }
 .karte {
     width: 100px;
@@ -68,11 +73,6 @@ st.markdown("""
 .karte:hover {
     transform: scale(1.03);
 }
-.verdeckt {
-    background-color: #bbb;
-    border: 2px solid #888;
-    color: transparent;
-}
 .gezogen {
     opacity: 0.3;
     pointer-events: none;
@@ -91,9 +91,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ----------------------------------------
 # Titel
-st.markdown("## 🎴 Zeitalter I – Pyramidenlayout wie in React-Version")
+st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (mobilfreundlich)")
 
+# ----------------------------------------
 # Kartenanzeige
 st.markdown('<div class="karten-auslage">', unsafe_allow_html=True)
 
@@ -108,9 +110,10 @@ for row in karten_layout:
         if gezogen:
             css_classes.append("gezogen")
 
-        # Karte als HTML + Button im Hintergrund (triggert Python)
-        with st.container():
-            if not gezogen and st.button(" ", key=f"karte_{karten_id}"):
+        # Klickbare Karte mit form
+        with st.form(key=f"form_{karten_id}"):
+            submit = st.form_submit_button(" ")
+            if submit and not gezogen:
                 karte_ziehen(karten_id)
 
             st.markdown(f"""
@@ -123,12 +126,17 @@ for row in karten_layout:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+# ----------------------------------------
 # Letzter Reward
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# Reset
+# ----------------------------------------
+# Reset-Button
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen = set()
     st.session_state.last_reward = None
     st.experimental_rerun()
+
+    
+
