@@ -1,33 +1,34 @@
+import streamlit as st
 from env.duel_env import DuelResourceEnv
-import logging
 import random
+
+# Titel
+st.title("🎮 7 Wonders Duel – KI-Zug-Simulation")
 
 # Environment initialisieren
 env = DuelResourceEnv(verbose=True)
 obs = env.reset()
 
-# Karten Stapel anzeigen
-print("\n🔹 Kartenstapel anzeigen:")
-env.render_board()  # Diese Methode zeigt den Kartenstapel grafisch an (falls vorhanden)
+# Karten-Stapel anzeigen
+st.subheader("🔹 Kartenstapel anzeigen")
 
-## State
+# Optional: Wenn render_board() ein Text-Board zurückgibt
+try:
+    board_output = env.render_board()
+    if board_output:
+        st.text(board_output)
+except Exception as e:
+    st.warning(f"Board konnte nicht angezeigt werden: {e}")
+
+# Spielstatus
 done = False
 total_reward = 0
 step_counter = 1
-
-# Logging in Datei + Konsole
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("spielverlauf.log"),
-        logging.StreamHandler()
-    ]
-)
+log_buffer = []
 
 # Spielschleife
 while not done:
-    # Valid actions zuerst aus Beobachtung holen (ab jetzt im Info enthalten)
+    # Gültige Aktionen bestimmen
     valid_actions = [
         card["id"]
         for card in env.board
@@ -35,19 +36,25 @@ while not done:
     ]
 
     if not valid_actions:
-        logging.warning("⚠️ Keine gültigen Aktionen verfügbar.")
+        st.warning("⚠️ Keine gültigen Aktionen mehr verfügbar.")
         break
 
+    # Zufällige gültige Aktion wählen
     action = random.choice(valid_actions)
     obs, reward, done, info = env.step(action)
-    
-    # Karte anzeigen
+
+    # Infos extrahieren
     karte = info.get("karte", "❌ Ungültig")
     typ = info.get("typ", "-")
-    print(f"\n🔹 Karte gezogen: {karte} ({typ})")
-
-    logging.info(f"[{step_counter}] Aktion: {karte} ({typ}) → Reward: {reward}")
-    total_reward += reward
+    zug_info = f"[{step_counter}] Aktion: {karte} ({typ}) → Reward: {reward}"
+    log_buffer.append(zug_info)
     step_counter += 1
+    total_reward += reward
 
-print("\n✅ Spiel beendet. Gesamt-Reward:", total_reward)
+# Ergebnisse anzeigen
+st.success(f"✅ Spiel beendet. Gesamt-Reward: {total_reward}")
+
+# Spielverlauf anzeigen
+st.subheader("📜 Spielverlauf")
+for line in log_buffer:
+    st.text(line)
