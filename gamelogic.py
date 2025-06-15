@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 def load_cards_from_json():
-    path = Path(__file__).parent / "zeitalter1_offiziell.json"
+    path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
