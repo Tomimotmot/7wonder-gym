@@ -1,9 +1,7 @@
-# === layout.py (Pyramidenlayout im echten Spielstil, statisch) ===
-
 import streamlit as st
 import json
+import streamlit.components.v1 as components
 from pathlib import Path
-
 
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
@@ -25,24 +23,25 @@ def render_layout():
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # Kartenpyramide mit echtem Versatz-Layout (Zeilen mit Einrückung)
+    # Kartenpyramide
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    st.markdown("""
+    # HTML & CSS
+    html = """
     <style>
     .pyramide {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 10px;
         margin-top: 20px;
     }
     .reihe {
         display: flex;
+        gap: 10px;
         justify-content: center;
-        gap: 6px;
     }
     .reihe:nth-child(1) { margin-left: 90px; }
     .reihe:nth-child(2) { margin-left: 65px; }
@@ -52,7 +51,7 @@ def render_layout():
 
     .karte {
         width: 60px;
-        height: 75px;
+        aspect-ratio: 4 / 5;
         border-radius: 6px;
         padding: 4px;
         font-size: 10px;
@@ -81,9 +80,9 @@ def render_layout():
         font-style: italic;
     }
     </style>
-    """, unsafe_allow_html=True)
+    <div class='pyramide'>
+    """
 
-    html = "<div class='pyramide'>"
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
         is_open_row = row_idx % 2 == 0
@@ -102,8 +101,7 @@ def render_layout():
         html += "</div>"
     html += "</div>"
 
-    st.markdown(html, unsafe_allow_html=True)
-
+    components.html(html, height=720, scrolling=False)
 
 
 def load_cards_from_json():
