@@ -4,17 +4,10 @@ import json
 from pathlib import Path
 
 def render_layout():
-    """
-    Hauptfunktion zur Darstellung der 7 Wonders Duel Zeitalter-I-Auslage.
-    Sie lädt Kartendaten aus JSON, ordnet sie im 2–3–4–5–6-Pyramidenlayout an
-    und zeigt je nach Position offene (weiß) oder verdeckte (graue) Karten.
-    """
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # Struktur der Kartenreihen (von oben nach unten)
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
-
     cards_by_row = []
     card_id = 0
 
@@ -22,17 +15,17 @@ def render_layout():
         row = []
         is_open_row = row_idx % 2 == 0  # Offen in Reihe 0, 2, 4
         for _ in range(cards_in_row):
-            # Karte aus JSON-Daten nehmen
             card = sample_cards[card_id % len(sample_cards)]
+            effekt_text = f'{card["effekt"]["value"]}× {card["effekt"]["name"]}'
             row.append({
                 "name": card["name"],
-                "produziert": card["produziert"],
+                "effekt": effekt_text,
                 "offen": is_open_row
             })
             card_id += 1
         cards_by_row.append(row)
 
-    # HTML/CSS + Kartendarstellung
+    # HTML & CSS
     html = """
     <style>
     .pyramide {
@@ -86,9 +79,9 @@ def render_layout():
         for card in row:
             status = "offen" if card["offen"] else "verdeckt"
             if card["offen"]:
-                content = f'<div class="produziert">{card["produziert"]}</div><div class="kartenname">{card["name"]}</div>'
+                content = f'<div class="produziert">{card["effekt"]}</div><div class="kartenname">{card["name"]}</div>'
             else:
-                content = '<div class="produziert"></div><div class="kartenname"></div>'
+                content = '<div class="produziert">???</div><div class="kartenname">???</div>'
             html += f'<div class="karte {status}">{content}</div>'
         html += '</div>'
     html += '</div>'
@@ -97,15 +90,14 @@ def render_layout():
 
 
 def load_cards_from_json():
-    """
-    Lädt die Kartendaten aus der Datei 'zeitalter1.json' und prüft auf Vollständigkeit.
-    Erwartet: Felder 'name' und 'produziert' je Karte.
-    """
-    path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
+    path = Path(__file__).parent / "zeitalter1_offiziell.json"
     with open(path, encoding="utf-8") as f:
         cards = json.load(f)
 
     for i, card in enumerate(cards):
-        if "name" not in card or "produziert" not in card:
-            raise ValueError(f"Karte {i+1} fehlt 'name' oder 'produziert'")
+        if "name" not in card or "effekt" not in card:
+            raise ValueError(f"Karte {i+1} fehlt 'name' oder 'effekt'")
+        if "name" not in card["effekt"] or "value" not in card["effekt"]:
+            raise ValueError(f"Karte {i+1} hat unvollständigen Effekt")
+
     return cards
