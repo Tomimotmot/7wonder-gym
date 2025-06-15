@@ -1,5 +1,5 @@
 import streamlit as st
-from layout import render_layout, render_ressourcen
+from layout import render_layout
 from gamelogic import init_game
 
 st.set_page_config(page_title="7 Wonders Duel", layout="centered")
