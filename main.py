@@ -3,7 +3,7 @@ st.set_page_config(layout="wide", page_title="7 Wonders Duel")
 
 import json
 
-# Layout: Zeilenweise Karten-IDs (Pyramide: 2–3–4–5–6)
+# Kartenlayout: Zeilenweise IDs (2–3–4–5–6)
 karten_layout = [
     [0, 1],
     [2, 3, 4],
@@ -12,30 +12,35 @@ karten_layout = [
     [14, 15, 16, 17, 18, 19]
 ]
 
+# Kürzel für Ressourcen
 ressourcen_kürzel = {
-    "Holz": "H", "Stein": "S", "Ton": "T", "Papyrus": "P", "Glas": "G"
+    "Holz": "H",
+    "Stein": "S",
+    "Ton": "T",
+    "Papyrus": "P",
+    "Glas": "G"
 }
 
 # Karten-Daten laden
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
-# Session-State vorbereiten
+# State vorbereiten
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
-# Klick-Logik über Query-Params
+# Klick-Auswertung über Query
 clicked = st.query_params.get("click", [None])[0]
 if clicked and clicked.isdigit():
     k_id = int(clicked)
     if k_id not in st.session_state.gezogen:
         st.session_state.gezogen.add(k_id)
         st.session_state.last_reward = karten_data[k_id].get("produziert", "❌ nichts")
-    st.query_params.clear()  # URL-Parameter leeren
+    st.query_params.clear()  # Klick aus der URL entfernen
 
-# CSS Styling
+# CSS-Styling
 st.markdown("""
 <style>
 .karten-auslage {
@@ -97,7 +102,7 @@ st.markdown("""
 # Titel
 st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (mobilfreundlich & klickbar)")
 
-# Kartenanzeige
+# Kartenanzeige (Pyramide)
 st.markdown('<div class="karten-auslage">', unsafe_allow_html=True)
 
 max_karten = max(len(row) for row in karten_layout)
@@ -116,11 +121,11 @@ for row in karten_layout:
 
         row_html += f"""
         <form method="get" class="card-wrapper">
-          <input type="hidden" name="click" value="{karten_id}"/>
-          <button type="submit" class="{css}">
-            <div class="kartenressource">{symbol}</div>
-            <div class="kartenname">{karte['name']}</div>
-          </button>
+            <input type="hidden" name="click" value="{karten_id}"/>
+            <button type="submit" class="{css}">
+                <div class="kartenressource">{symbol}</div>
+                <div class="kartenname">{karte['name']}</div>
+            </button>
         </form>
         """
 
@@ -133,7 +138,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# Reset-Button
+# Reset
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen.clear()
     st.session_state.last_reward = None
