@@ -40,8 +40,9 @@ def render_layout():
     card_id = 0
 
     # === 4. Klickverarbeitung ===
-    clicked_id = st.experimental_get_query_params().get("click", [None])[0]
-    if clicked_id is not None:
+    params = st.query_params
+    clicked_id = params.get("click")
+    if clicked_id:
         try:
             clicked_id = int(clicked_id)
             if clicked_id not in st.session_state.genommene_karten:
@@ -49,7 +50,7 @@ def render_layout():
                 st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
                 st.session_state.genommene_karten.add(clicked_id)
                 st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-            st.experimental_set_query_params()
+            st.query_params.clear()
             st.rerun()
         except Exception as e:
             st.error(f"Fehler beim Klick: {e}")
