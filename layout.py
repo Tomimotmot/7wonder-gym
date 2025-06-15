@@ -2,58 +2,87 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 def render_layout():
-    st.markdown("### 🃏 Zeitalter I – Kartenauslage")
+    st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
+    # Definiere Struktur: 2–3–4–5–6 Karten (oben nach unten)
+    layout_structure = [2, 3, 4, 5, 6]
+    total_cards = sum(layout_structure)
+    card_id = 0
+    cards_by_row = []
+
+    # Sichtbarkeitslogik + Kartenaufbau
+    for row_idx, cards_in_row in enumerate(layout_structure):
+        row = []
+        for col in range(cards_in_row):
+            is_open = calculate_visibility(row_idx, col, layout_structure)
+            row.append({
+                "id": card_id,
+                "name": f"Karte {card_id + 1}",
+                "ressource": "🃏",
+                "is_open": is_open
+            })
+            card_id += 1
+        cards_by_row.append(row)
+
+    # HTML/CSS + Kartenanzeige
     html = """
     <style>
-    .karten-container {
+    .pyramide {
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
-        padding: 10px;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
     }
-
+    .reihe {
+        display: flex;
+        gap: 10px;
+    }
     .karte {
-        background-color: #f2f2f2;
-        border: 2px solid #888;
-        border-radius: 12px;
-        padding: 14px;
-        min-width: 110px;
-        min-height: 90px;
-        font-size: 16px;
+        background-color: #f0f0f0;
+        border: 2px solid #555;
+        border-radius: 10px;
+        padding: 10px;
+        min-width: 90px;
+        min-height: 100px;
         text-align: center;
-        touch-action: manipulation;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        font-size: 15px;
+        box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
     }
-
-    .kartenressource {
-        font-size: 24px;
-        margin-bottom: 4px;
-    }
-
-    .kartenname {
-        font-weight: bold;
+    .verdeckt {
+        background-color: #999;
+        color: #444;
     }
     </style>
-
-    <div class="karten-container">
-        <div class="karte">
-            <div class="kartenressource">🪨</div>
-            <div class="kartenname">Steinbruch</div>
-        </div>
-        <div class="karte">
-            <div class="kartenressource">🧱</div>
-            <div class="kartenname">Lehmgrube</div>
-        </div>
-        <div class="karte">
-            <div class="kartenressource">🌲</div>
-            <div class="kartenname">Holzfällerlager</div>
-        </div>
-        <div class="karte">
-            <div class="kartenressource">⛏</div>
-            <div class="kartenname">Miene</div>
-        </div>
-    </div>
+    <div class="pyramide">
     """
-    components.html(html, height=300, scrolling=False)
+
+    for row in cards_by_row:
+        html += '<div class="reihe">'
+        for card in row:
+            cls = "karte"
+            if not card["is_open"]:
+                cls += " verdeckt"
+                content = "<div>🕳</div><div>???</div>"
+            else:
+                content = f"<div>{card['ressource']}</div><div>{card['name']}</div>"
+            html += f'<div class="{cls}">{content}</div>'
+        html += '</div>'
+    html += '</div>'
+
+    components.html(html, height=600, scrolling=False)
+
+def calculate_visibility(row_idx, col_idx, layout_structure):
+    """
+    Sichtbarkeitslogik:
+    Eine Karte ist offen, wenn sie keine Karte mehr blockiert – d.h.
+    sie liegt in der untersten Reihe oder hat keine Karte mehr direkt darauf.
+    """
+    if row_idx == len(layout_structure) - 1:
+        return True  # Unterste Reihe ist immer offen
+
+    below_count = layout_structure[row_idx + 1]
+    offset = (below_count - layout_structure[row_idx]) // 2
+    left = col_idx + offset
+    right = left + 1
+    return right >= below_count  # Wenn rechts kein Blocker mehr da ist
