@@ -91,10 +91,9 @@ def render_layout():
         const url = new URL(window.location.href);
         url.searchParams.set('click', card_id);
         window.history.pushState({}, '', url.toString());
-        location.reload(); // Force reload to trigger st.query_params
+        location.reload();
     }
     </script>
-
     <div class='pyramide'>
     """
 
