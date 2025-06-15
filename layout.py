@@ -31,32 +31,31 @@ def render_layout():
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 6px;
+        margin-top: 10px;
     }
     .reihe {
         display: flex;
-        gap: 10px;
+        gap: 6px;
     }
     .karte {
         background-color: #f0f0f0;
-        border: 2px solid #555;
-        border-radius: 10px;
-        padding: 10px;
-        min-width: 90px;
-        min-height: 100px;
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 6px;
+        min-width: 60px;
+        min-height: 70px;
         text-align: center;
-        font-size: 15px;
-        box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+        font-size: 12px;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
     }
     .verdeckt {
-        background-color: #999;
-        color: #444;
+        background-color: #aaa;
+        color: #333;
     }
     </style>
     <div class="pyramide">
     """
-
     for row in cards_by_row:
         html += '<div class="reihe">'
         for card in row:
