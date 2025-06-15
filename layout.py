@@ -1,4 +1,4 @@
-# === layout.py (Pyramidenlayout mit modernem Click-Handling und Spielerwechsel) ===
+# === layout.py (Pyramidenlayout mit funktionierendem Click-Handling) ===
 
 import streamlit as st
 import json
@@ -39,7 +39,22 @@ def render_layout():
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    # === 4. CSS + JavaScript zum Click-Handling ===
+    # === 4. Klickverarbeitung ===
+    clicked_id = st.experimental_get_query_params().get("click", [None])[0]
+    if clicked_id is not None:
+        try:
+            clicked_id = int(clicked_id)
+            if clicked_id not in st.session_state.genommene_karten:
+                card = sample_cards[clicked_id % len(sample_cards)]
+                st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
+                st.session_state.genommene_karten.add(clicked_id)
+                st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+            st.experimental_set_query_params()
+            st.rerun()
+        except Exception as e:
+            st.error(f"Fehler beim Klick: {e}")
+
+    # === 5. HTML-Rendern ===
     html = """
     <style>
     .pyramide {
@@ -88,13 +103,14 @@ def render_layout():
     </style>
     <script>
     function sendClick(card_id) {
-        window.location.search = '?click=' + card_id;
+        const url = new URL(window.location);
+        url.searchParams.set('click', card_id);
+        window.location.href = url.toString();
     }
     </script>
     <div class='pyramide'>
     """
 
-    # === 5. Pyramidenstruktur zeichnen ===
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
         is_open_row = row_idx % 2 == 0
@@ -121,21 +137,6 @@ def render_layout():
     html += "</div>"
 
     components.html(html, height=740, scrolling=False)
-
-    # === 6. Klickverarbeitung ===
-    params = st.query_params
-    if "click" in params:
-        try:
-            clicked_id = int(params["click"])
-            if clicked_id not in st.session_state.genommene_karten:
-                card = sample_cards[clicked_id % len(sample_cards)]
-                st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
-                st.session_state.genommene_karten.add(clicked_id)
-                st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-            st.query_params.clear()
-            st.rerun()
-        except Exception as e:
-            st.error(f"Fehler beim Klick: {e}")
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
