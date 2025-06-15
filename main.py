@@ -1,4 +1,6 @@
+
 import streamlit as st
+st.set_page_config(layout="wide", page_title="7 Wonders Duel")  # GANZ OBEN!
 import json
 
 # Layout: Zeilenweise IDs (2–3–4–5–6)
@@ -25,13 +27,14 @@ if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
 # Klick-Logik über GET-Parameter
-clicked = st.experimental_get_query_params().get("click", [None])[0]
+clicked = st.query_params.get("click", [None])[0]
 if clicked and clicked.isdigit():
     k_id = int(clicked)
     if k_id not in st.session_state.gezogen:
         st.session_state.gezogen.add(k_id)
         st.session_state.last_reward = karten_data[k_id].get("produziert", "❌ nichts")
-        st.experimental_set_query_params()  # Parameter löschen
+        st.query_params.clear()
+        # Parameter löschen
 
 # CSS Styling
 st.set_page_config(layout="wide")
