@@ -1,4 +1,4 @@
-# === layout.py (Statisch, sauberes Pyramidenlayout ohne Interaktion) ===
+# === layout.py (Statisch, sauberes Pyramidenlayout ohne Interaktion, optimiert) ===
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -6,7 +6,7 @@ import streamlit.components.v1 as components
 def render_ressourcen():
     st.markdown("### Ressourcen")
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
-    table = "<table style='width:100%; text-align:center;'>"
+    table = "<table style='width:100%; text-align:center; border-collapse: collapse;'>"
     table += "<tr><th></th>" + "".join(f"<th>{r}</th>" for r in resourcen) + "</tr>"
     for spieler in ["Spieler 1", "Spieler 2"]:
         table += f"<tr><td><b>{spieler}</b></td>"
@@ -20,29 +20,30 @@ def render_ressourcen():
 def render_layout():
     st.markdown(f"## 🃏 Zeitalter I – Kartenauslage ({st.session_state.spieler} ist am Zug)")
 
+    # CSS für Pyramidenlayout und Karten
     st.markdown("""
     <style>
     .pyramide {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         margin-top: 20px;
     }
     .reihe {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         justify-content: center;
     }
     .karte {
         border: 1px solid #444;
         border-radius: 8px;
         padding: 6px 4px;
-        width: 72px;
-        height: 86px;
+        width: 75px;
+        height: 90px;
         text-align: center;
         font-size: 10px;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+        box-shadow: 2px 2px 3px rgba(0,0,0,0.2);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -68,8 +69,8 @@ def render_layout():
     </style>
     """, unsafe_allow_html=True)
 
+    # Kartenanzeige in HTML
     html = "<div class='pyramide'>"
-
     for row in st.session_state.auslage:
         html += "<div class='reihe'>"
         for card in row:
@@ -87,4 +88,4 @@ def render_layout():
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=720, scrolling=False)
+    components.html(html, height=740, scrolling=False)
