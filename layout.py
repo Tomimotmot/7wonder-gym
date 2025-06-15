@@ -90,9 +90,11 @@ def render_layout():
     function sendClick(card_id) {
         const url = new URL(window.location.href);
         url.searchParams.set('click', card_id);
-        window.location.href = url.toString();
+        window.history.pushState({}, '', url.toString());
+        location.reload();
     }
     </script>
+
     <div class='pyramide'>
     """
 
