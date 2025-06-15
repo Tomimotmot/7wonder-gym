@@ -1,4 +1,5 @@
 import streamlit as st
+from gamelogic import handle_card_click
 
 def render_ressourcen():
     st.markdown("### Ressourcen")
