@@ -88,7 +88,7 @@ def render_layout():
             if card["offen"]:
                 content = f'<div class="produziert">{card["produziert"]}</div><div class="kartenname">{card["name"]}</div>'
             else:
-                content = '<div class="produziert">🕳</div><div class="kartenname">???</div>'
+                content = '<div class="produziert"></div><div class="kartenname"></div>'
             html += f'<div class="karte {status}">{content}</div>'
         html += '</div>'
     html += '</div>'
