@@ -1,9 +1,9 @@
-
 import streamlit as st
-st.set_page_config(layout="wide", page_title="7 Wonders Duel")  # GANZ OBEN!
+st.set_page_config(layout="wide", page_title="7 Wonders Duel")
+
 import json
 
-# Layout: Zeilenweise IDs (2–3–4–5–6)
+# Layout: Zeilenweise Karten-IDs (Pyramide: 2–3–4–5–6)
 karten_layout = [
     [0, 1],
     [2, 3, 4],
@@ -20,24 +20,22 @@ ressourcen_kürzel = {
 with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
     karten_data = json.load(f)
 
-# State
+# Session-State vorbereiten
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
-# Klick-Logik über GET-Parameter
+# Klick-Logik über Query-Params
 clicked = st.query_params.get("click", [None])[0]
 if clicked and clicked.isdigit():
     k_id = int(clicked)
     if k_id not in st.session_state.gezogen:
         st.session_state.gezogen.add(k_id)
         st.session_state.last_reward = karten_data[k_id].get("produziert", "❌ nichts")
-        st.query_params.clear()
-        # Parameter löschen
+    st.query_params.clear()  # URL-Parameter leeren
 
 # CSS Styling
-st.set_page_config(layout="wide")
 st.markdown("""
 <style>
 .karten-auslage {
@@ -97,7 +95,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Titel
-st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (perfekt mobil)")
+st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (mobilfreundlich & klickbar)")
 
 # Kartenanzeige
 st.markdown('<div class="karten-auslage">', unsafe_allow_html=True)
@@ -117,7 +115,7 @@ for row in karten_layout:
         css = "karte gezogen" if gezogen else "karte"
 
         row_html += f"""
-        <form method="GET" class="card-wrapper">
+        <form method="get" class="card-wrapper">
           <input type="hidden" name="click" value="{karten_id}"/>
           <button type="submit" class="{css}">
             <div class="kartenressource">{symbol}</div>
@@ -135,7 +133,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# Reset
+# Reset-Button
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen.clear()
     st.session_state.last_reward = None
