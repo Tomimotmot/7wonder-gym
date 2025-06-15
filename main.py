@@ -3,7 +3,8 @@ st.set_page_config(layout="wide", page_title="7 Wonders Duel")
 
 import json
 
-# Kartenlayout: Zeilenweise IDs (2–3–4–5–6)
+# -------------------------------
+# Kartenlayout (2–3–4–5–6 = 20 Karten)
 karten_layout = [
     [0, 1],
     [2, 3, 4],
@@ -12,7 +13,7 @@ karten_layout = [
     [14, 15, 16, 17, 18, 19]
 ]
 
-# Kürzel für Ressourcen
+# Ressourcenkürzel (Initialen)
 ressourcen_kürzel = {
     "Holz": "H",
     "Stein": "S",
@@ -21,34 +22,37 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
-# Karten-Daten laden mit Fehlerbehandlung
+# -------------------------------
+# Karten-Daten laden
 try:
     with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
         karten_data = json.load(f)
 except FileNotFoundError:
-    st.error("❌ Datei 'grundspiel_karten_zeitalter_1.json' nicht gefunden.")
+    st.error("❌ JSON-Datei nicht gefunden.")
     st.stop()
 except json.JSONDecodeError:
-    st.error("❌ JSON-Datei ist fehlerhaft.")
+    st.error("❌ Fehler beim Parsen der JSON-Datei.")
     st.stop()
 
-# Session State vorbereiten
+# -------------------------------
+# Session-Variablen
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
-# Klick-Auswertung (über URL-Query)
+# -------------------------------
+# Klick-Verarbeitung via URL-Query
 clicked = st.query_params.get("click", [None])[0]
 if clicked and clicked.isdigit():
     k_id = int(clicked)
     if 0 <= k_id < len(karten_data):
         if k_id not in st.session_state.gezogen:
             st.session_state.gezogen.add(k_id)
-            karte = karten_data[k_id]
-            st.session_state.last_reward = karte.get("produziert", "❌ nichts")
+            st.session_state.last_reward = karten_data[k_id].get("produziert", "❌ nichts")
     st.query_params.clear()
 
+# -------------------------------
 # CSS-Styling
 st.markdown("""
 <style>
@@ -108,10 +112,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# -------------------------------
 # Titel
 st.markdown("## 🟥 Zeitalter I – Pyramidenlayout (mobilfreundlich & klickbar)")
 
-# Kartenanzeige (Pyramide)
+# -------------------------------
+# Kartenanzeige starten
 st.markdown('<div class="karten-auslage">', unsafe_allow_html=True)
 
 max_karten = max(len(row) for row in karten_layout)
@@ -139,17 +145,18 @@ for row in karten_layout:
         """
 
     row_html += '</div>'
-    st.markdown(row_html, unsafe_allow_html=True)
+    st.markdown(row_html, unsafe_allow_html=True)  # <- GANZ WICHTIG!
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Letzter Reward anzeigen
+# -------------------------------
+# Letzter Reward
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# Reset-Button
+# -------------------------------
+# Reset
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen.clear()
     st.session_state.last_reward = None
     st.experimental_rerun()
-
