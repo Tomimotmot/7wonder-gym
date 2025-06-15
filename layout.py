@@ -88,10 +88,7 @@ def render_layout():
     </style>
     <script>
     function sendClick(card_id) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('click', card_id);
-        window.history.pushState({}, '', url.toString());
-        location.reload();
+        window.location.search = '?click=' + card_id;
     }
     </script>
     <div class='pyramide'>
