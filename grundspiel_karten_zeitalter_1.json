@@ -1,22 +1,32 @@
 [
-  { "name": "Holzfällerlager", "typ": "Rohstoffgebäude", "produziert": "Holz" },
-  { "name": "Steinbruch", "typ": "Rohstoffgebäude", "produziert": "Stein" },
-  { "name": "Tonofen", "typ": "Rohstoffgebäude", "produziert": "Ton" },
-  { "name": "Lehmgrube", "typ": "Rohstoffgebäude", "produziert": "Ton" },
-  { "name": "Sägewerk", "typ": "Rohstoffgebäude", "produziert": "Holz" },
-  { "name": "Marmorsteinbruch", "typ": "Rohstoffgebäude", "produziert": "Stein" },
-  { "name": "Glaserei", "typ": "Manufaktur", "produziert": "Glas" },
-  { "name": "Weberei", "typ": "Manufaktur", "produziert": "Papyrus" },
-  { "name": "Töpferei", "typ": "Manufaktur", "produziert": "Ton" },
-  { "name": "Lehmziegelbrennerei", "typ": "Rohstoffgebäude", "produziert": "Ton" },
-  { "name": "Kupferschmiede", "typ": "Manufaktur", "produziert": "Glas" },
-  { "name": "Papyrushersteller", "typ": "Manufaktur", "produziert": "Papyrus" },
-  { "name": "Bauernmarkt", "typ": "Zivilgebäude", "produziert": "" },
-  { "name": "Schänke", "typ": "Zivilgebäude", "produziert": "" },
-  { "name": "Wachturm", "typ": "Militärgebäude", "produziert": "" },
-  { "name": "Kaserne", "typ": "Militärgebäude", "produziert": "" },
-  { "name": "Militärposten", "typ": "Militärgebäude", "produziert": "" },
-  { "name": "Brunnen", "typ": "Zivilgebäude", "produziert": "" },
-  { "name": "Theater", "typ": "Zivilgebäude", "produziert": "" },
-  { "name": "Altar", "typ": "Zivilgebäude", "produziert": "" }
+  { "name": "Holzplatz", "typ": "Rohstoff", "effekt": { "name": "Holz", "value": 1 }, "kosten": [] },
+  { "name": "Holzfällerlager", "typ": "Rohstoff", "effekt": { "name": "Holz", "value": 1 }, "kosten": [] },
+  { "name": "Ziegelei", "typ": "Rohstoff", "effekt": { "name": "Lehm", "value": 1 }, "kosten": [] },
+  { "name": "Tongrube", "typ": "Rohstoff", "effekt": { "name": "Lehm", "value": 1 }, "kosten": [] },
+  { "name": "Steinbruch", "typ": "Rohstoff", "effekt": { "name": "Stein", "value": 1 }, "kosten": [] },
+  { "name": "Gesteinslagerstätte", "typ": "Rohstoff", "effekt": { "name": "Stein", "value": 1 }, "kosten": [] },
+
+  { "name": "Glashütte", "typ": "Manufaktur", "effekt": { "name": "Glas", "value": 1 }, "kosten": [ { "name": "Münzen", "value": 1 } ] },
+  { "name": "Papyrus-Fertigung", "typ": "Manufaktur", "effekt": { "name": "Papyrus", "value": 1 }, "kosten": [ { "name": "Münzen", "value": 1 } ] },
+
+  { "name": "Wachturm", "typ": "Militär", "effekt": { "name": "Schild", "value": 1 }, "kosten": [ { "name": "Lehm", "value": 1 } ] },
+
+  { "name": "Werkstatt", "typ": "Wissenschaft", "effekt": { "name": "Kompass", "value": 1 }, "kosten": [ { "name": "Glas", "value": 1 } ] },
+  { "name": "Apotheke", "typ": "Wissenschaft", "effekt": { "name": "Rad", "value": 1 }, "kosten": [ { "name": "Papyrus", "value": 1 } ] },
+
+  { "name": "Steinlager", "typ": "Handelsgebäude", "effekt": { "name": "Stein", "value": 1 }, "kosten": [ { "name": "Münzen", "value": 3 } ] },
+  { "name": "Tonlager", "typ": "Handelsgebäude", "effekt": { "name": "Lehm", "value": 1 }, "kosten": [ { "name": "Münzen", "value": 3 } ] },
+  { "name": "Holzlager", "typ": "Handelsgebäude", "effekt": { "name": "Holz", "value": 1 }, "kosten": [ { "name": "Münzen", "value": 3 } ] },
+
+  { "name": "Theater", "typ": "Zivilgebäude", "effekt": { "name": "Siegpunkte", "value": 3 }, "kosten": [] },
+  { "name": "Altar", "typ": "Zivilgebäude", "effekt": { "name": "Siegpunkte", "value": 2 }, "kosten": [] },
+  { "name": "Bäder", "typ": "Zivilgebäude", "effekt": { "name": "Siegpunkte", "value": 3 }, "kosten": [ { "name": "Lehm", "value": 1 } ] },
+
+  { "name": "Skriptorium", "typ": "Wissenschaft", "effekt": { "name": "Buch", "value": 1 }, "kosten": [ { "name": "Papyrus", "value": 1 } ] },
+
+  { "name": "Stall", "typ": "Militär", "effekt": { "name": "Schild", "value": 1 }, "kosten": [ { "name": "Holz", "value": 1 }, { "name": "Lehm", "value": 1 } ] },
+  { "name": "Garnison", "typ": "Militär", "effekt": { "name": "Schild", "value": 1 }, "kosten": [ { "name": "Stein", "value": 1 }, { "name": "Lehm", "value": 1 } ] },
+  { "name": "Palisade", "typ": "Militär", "effekt": { "name": "Schild", "value": 1 }, "kosten": [ { "name": "Lehm", "value": 2 } ] },
+
+  { "name": "Taverne", "typ": "Handelsgebäude", "effekt": { "name": "Münzen", "value": 4 }, "kosten": [] }
 ]
