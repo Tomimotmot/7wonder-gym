@@ -1,4 +1,4 @@
-# layout.py – Pyramidenlayout mit klickbaren Karten per st.form_submit_button
+# layout.py – Pyramidenlayout mit klickbaren Karten per st.form_submit_button (stabil)
 
 import streamlit as st
 import json
@@ -84,18 +84,16 @@ def render_layout():
                     if taken:
                         st.markdown(f"<div class='karte verdeckt'>✓</div>", unsafe_allow_html=True)
                     elif is_open:
-                        if st.form_submit_button(
-                            label=f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}",
-                            key=f"card_{card_id}"
-                        ):
+                        btn = st.form_submit_button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=f"card_{card_id}")
+                        if btn:
                             st.session_state.klick_id = card_id
                     else:
                         st.markdown("<div class='karte verdeckt'>???</div>", unsafe_allow_html=True)
 
                 card_id += 1
 
-        # Dummy Submit-Fallback
-        st.form_submit_button("Weiter")
+        # Wichtiger Dummy-Submit, sonst wird keine Interaktion erkannt
+        st.form_submit_button("Bestätigen")
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
