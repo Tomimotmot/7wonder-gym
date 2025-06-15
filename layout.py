@@ -1,5 +1,3 @@
-# === layout.py (Pyramidenlayout mit Spielerwechsel und Ressourcenvergabe – sauberes Rendering ohne doppelte Buttons) ===
-
 import streamlit as st
 import json
 from pathlib import Path
@@ -8,7 +6,7 @@ import streamlit.components.v1 as components
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # === 1. Initialisiere Session-State für Spieler, Ressourcen, genommene Karten ===
+    # === 1. Initialisiere Session-State ===
     if "spieler" not in st.session_state:
         st.session_state.spieler = "Spieler 1"
 
@@ -25,7 +23,7 @@ def render_layout():
     if "klick" not in st.session_state:
         st.session_state.klick = None
 
-    # === 2. Zeige Ressourcenübersicht an ===
+    # === 2. Ressourcenanzeige ===
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
     st.markdown(f"### Ressourcenübersicht (aktuell: {st.session_state.spieler})")
     res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
@@ -37,12 +35,12 @@ def render_layout():
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # === 3. Kartenlayout definieren (z. B. Pyramide mit 2–3–4–5–6 Karten) ===
+    # === 3. Kartenlayout ===
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    # === 4. CSS & JS ===
+    # === 4. HTML + JS Rendering ===
     html = """
     <style>
     .pyramide {
@@ -105,7 +103,6 @@ def render_layout():
     <div class='pyramide'>
     """
 
-    # === 5. Karten darstellen ===
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
         is_open_row = row_idx % 2 == 0
@@ -116,7 +113,6 @@ def render_layout():
 
             if is_taken:
                 html += "<div class='karte verdeckt'>✓</div>"
-
             elif is_open_row:
                 html += f"""
                 <div class='karte offen' onclick=\"sendClick({card_id})\">
@@ -128,13 +124,12 @@ def render_layout():
                 html += "<div class='karte verdeckt'>???</div>"
 
             card_id += 1
-
         html += "</div>"
     html += "</div>"
 
     components.html(html, height=700, scrolling=False)
 
-    # === 6. Klickverarbeitung ===
+    # === 5. Klickverarbeitung ===
     if st.session_state.klick is not None:
         try:
             clicked_id = int(st.session_state.klick)
@@ -147,6 +142,7 @@ def render_layout():
             pass
         st.session_state.klick = None
         st.experimental_rerun()
+
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
