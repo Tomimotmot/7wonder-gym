@@ -1,14 +1,11 @@
-# === layout.py (Pyramidenlayout mit funktionierendem Click-Handling) ===
-
 import streamlit as st
 import json
 from pathlib import Path
-import streamlit.components.v1 as components
 
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # === 1. Session-State initialisieren ===
+    # Session State initialisieren
     if "spieler" not in st.session_state:
         st.session_state.spieler = "Spieler 1"
 
@@ -22,7 +19,7 @@ def render_layout():
     if "genommene_karten" not in st.session_state:
         st.session_state.genommene_karten = set()
 
-    # === 2. Ressourcenübersicht anzeigen ===
+    # Ressourcenübersicht
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
     st.markdown(f"### Ressourcenübersicht (aktuell: {st.session_state.spieler})")
     res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
@@ -34,110 +31,36 @@ def render_layout():
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # === 3. Kartenlayout & Daten laden ===
+    # Kartenpyramide
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    # === 4. Klickverarbeitung ===
-    params = st.query_params
-    clicked_id = params.get("click")
-    if clicked_id:
-        try:
-            clicked_id = int(clicked_id)
-            if clicked_id not in st.session_state.genommene_karten:
-                card = sample_cards[clicked_id % len(sample_cards)]
-                st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
-                st.session_state.genommene_karten.add(clicked_id)
-                st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-            st.query_params.clear()
-            st.rerun()
-        except Exception as e:
-            st.error(f"Fehler beim Klick: {e}")
-
-    # === 5. HTML-Rendern ===
-    html = """
-    <style>
-    .pyramide {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        margin-top: 20px;
-    }
-    .reihe {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-    }
-    .karte {
-        width: 80px;
-        height: 100px;
-        border-radius: 6px;
-        padding: 4px;
-        font-size: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        text-align: center;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        cursor: pointer;
-    }
-    .offen {
-        background-color: #fff;
-        color: #000;
-        border: 1px solid #444;
-    }
-    .verdeckt {
-        background-color: #bbb;
-        color: #bbb;
-        border: 1px solid #888;
-    }
-    .produziert {
-        font-weight: bold;
-        font-size: 10px;
-    }
-    .kartenname {
-        font-size: 9px;
-        font-style: italic;
-    }
-    </style>
-    <script>
-    function sendClick(card_id) {
-        const url = new URL(window.location);
-        url.searchParams.set('click', card_id);
-        window.location.href = url.toString();
-    }
-    </script>
-    <div class='pyramide'>
-    """
-
     for row_idx, cards_in_row in enumerate(layout_structure):
-        html += "<div class='reihe'>"
+        cols = st.columns(cards_in_row, gap="small")
         is_open_row = row_idx % 2 == 0
 
-        for _ in range(cards_in_row):
+        for col in cols:
             card = sample_cards[card_id % len(sample_cards)]
             is_taken = card_id in st.session_state.genommene_karten
 
             if is_taken:
-                html += "<div class='karte verdeckt'>✓</div>"
+                col.markdown(
+                    "<div style='background-color: #ddd; height: 100px; border-radius: 6px; text-align: center;'>✓</div>",
+                    unsafe_allow_html=True
+                )
             elif is_open_row:
-                html += f"""
-                <div class='karte offen' onclick=\"sendClick({card_id})\">
-                    <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
-                    <div class='kartenname'>{card['name']}</div>
-                </div>
-                """
+                if col.button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=f"card_{card_id}"):
+                    st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
+                    st.session_state.genommene_karten.add(card_id)
+                    st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+                    st.rerun()
             else:
-                html += "<div class='karte verdeckt'>???</div>"
-
+                col.markdown(
+                    "<div style='background-color: #bbb; height: 100px; border-radius: 6px;'></div>",
+                    unsafe_allow_html=True
+                )
             card_id += 1
-
-        html += "</div>"
-    html += "</div>"
-
-    components.html(html, height=740, scrolling=False)
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
