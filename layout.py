@@ -24,7 +24,7 @@ def render_layout():
     if "klick_id" not in st.session_state:
         st.session_state.klick_id = -1
 
-    # 2. Klick-Auswertung (falls vorhanden)
+    # 2. Klick-Auswertung
     if st.session_state.klick_id != -1:
         card_id = st.session_state.klick_id
         cards = load_cards_from_json()
@@ -92,7 +92,7 @@ def render_layout():
 
                 card_id += 1
 
-        # Dummy-Button erforderlich für Streamlit-Formularsystem
+        # Wichtiger Dummy-Submit, sonst wird keine Interaktion erkannt
         st.form_submit_button("Bestätigen")
 
 def load_cards_from_json():
