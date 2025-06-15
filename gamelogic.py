@@ -36,3 +36,13 @@ def init_game():
                 index += 1
             auslage.append(row)
         st.session_state.auslage = auslage
+
+def handle_card_click(card_id):
+    for row in st.session_state.auslage:
+        for card in row:
+            if card["id"] == card_id and not card["genommen"] and card["offen"]:
+                effekt = card["effekt"]
+                st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
+                card["genommen"] = True
+                st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+                st.experimental_rerun()
