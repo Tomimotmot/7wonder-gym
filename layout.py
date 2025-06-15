@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 def render_layout():
-    st.set_page_config(page_title="7 Wonders Duel – Zeitalter I", layout="centered")
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
     # Ressourcenübersicht (Start: 0)
