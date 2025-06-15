@@ -1,4 +1,4 @@
-# layout.py – Pyramidenlayout mit klickbaren Karten per st.form_submit_button (stabil)
+# layout.py – Klickbare Karten, jede in eigener st.form()
 
 import streamlit as st
 import json
@@ -7,7 +7,7 @@ from pathlib import Path
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # 1. Session-Init
+    # 1. Session init
     if "spieler" not in st.session_state:
         st.session_state.spieler = "Spieler 1"
 
@@ -21,22 +21,7 @@ def render_layout():
     if "genommene_karten" not in st.session_state:
         st.session_state.genommene_karten = set()
 
-    if "klick_id" not in st.session_state:
-        st.session_state.klick_id = -1
-
-    # 2. Klick-Auswertung
-    if st.session_state.klick_id != -1:
-        card_id = st.session_state.klick_id
-        cards = load_cards_from_json()
-        if card_id not in st.session_state.genommene_karten:
-            effekt = cards[card_id % len(cards)]["effekt"]
-            st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
-            st.session_state.genommene_karten.add(card_id)
-            st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-        st.session_state.klick_id = -1
-        st.rerun()
-
-    # 3. Ressourcenanzeige
+    # 2. Ressourcenanzeige
     st.markdown(f"### Ressourcenübersicht ({st.session_state.spieler} ist am Zug)")
     res = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
     table = "<table style='width:100%; text-align:center;'><tr><th></th>"
@@ -48,7 +33,7 @@ def render_layout():
     table += "</table>"
     st.markdown(table, unsafe_allow_html=True)
 
-    # 4. Pyramidenstruktur 2–3–4–5–6 (abwechselnd offen/verdeckt)
+    # 3. Pyramide
     layout_structure = [(2, True), (3, False), (4, True), (5, False), (6, True)]
     cards = load_cards_from_json()
     card_id = 0
@@ -73,27 +58,30 @@ def render_layout():
     </style>
     """, unsafe_allow_html=True)
 
-    with st.form("pyramidenform"):
-        for n, is_open in layout_structure:
-            cols = st.columns(n)
-            for i in range(n):
-                card = cards[card_id % len(cards)]
-                taken = card_id in st.session_state.genommene_karten
+    # 4. Karte für Karte in Columns + eigene Form
+    for n, is_open in layout_structure:
+        cols = st.columns(n)
+        for i in range(n):
+            card = cards[card_id % len(cards)]
+            taken = card_id in st.session_state.genommene_karten
 
-                with cols[i]:
-                    if taken:
-                        st.markdown(f"<div class='karte verdeckt'>✓</div>", unsafe_allow_html=True)
-                    elif is_open:
-                        btn = st.form_submit_button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=f"card_{card_id}")
-                        if btn:
-                            st.session_state.klick_id = card_id
-                    else:
-                        st.markdown("<div class='karte verdeckt'>???</div>", unsafe_allow_html=True)
+            with cols[i]:
+                if taken:
+                    st.markdown(f"<div class='karte verdeckt'>✓</div>", unsafe_allow_html=True)
+                elif is_open:
+                    with st.form(f"form_{card_id}"):
+                        st.markdown(f"<div class='karte offen'>"
+                                    f"<div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>"
+                                    f"<div class='kartenname'>{card['name']}</div></div>", unsafe_allow_html=True)
+                        if st.form_submit_button("Nehmen"):
+                            st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
+                            st.session_state.genommene_karten.add(card_id)
+                            st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+                            st.rerun()
+                else:
+                    st.markdown("<div class='karte verdeckt'>???</div>", unsafe_allow_html=True)
 
-                card_id += 1
-
-        # Wichtiger Dummy-Submit, sonst wird keine Interaktion erkannt
-        st.form_submit_button("Bestätigen")
+            card_id += 1
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
