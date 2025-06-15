@@ -1,49 +1,72 @@
-# === layout.py (Statisch, sauberes Pyramidenlayout ohne Interaktion, optimiert) ===
-
 import streamlit as st
 import streamlit.components.v1 as components
-
-def render_ressourcen():
-    st.markdown("### Ressourcen")
-    resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
-    table = "<table style='width:100%; text-align:center; border-collapse: collapse;'>"
-    table += "<tr><th></th>" + "".join(f"<th>{r}</th>" for r in resourcen) + "</tr>"
-    for spieler in ["Spieler 1", "Spieler 2"]:
-        table += f"<tr><td><b>{spieler}</b></td>"
-        for r in resourcen:
-            val = st.session_state.ressourcen[spieler][r]
-            table += f"<td>{val}</td>"
-        table += "</tr>"
-    table += "</table>"
-    st.markdown(table, unsafe_allow_html=True)
+import json
+from pathlib import Path
 
 def render_layout():
-    st.markdown(f"## 🃏 Zeitalter I – Kartenauslage ({st.session_state.spieler} ist am Zug)")
+    st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # CSS für Pyramidenlayout und Karten
-    st.markdown("""
+    # Ressourcenübersicht (Start: 0)
+    resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
+    spieler_ressourcen = {
+        "Spieler 1": {res: 0 for res in resourcen},
+        "Spieler 2": {res: 0 for res in resourcen}
+    }
+
+    # Counter-Tabelle
+    st.markdown("### Ressourcenübersicht")
+    res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
+    res_table += "<tr><th></th>" + "".join(f"<th>{res}</th>" for res in resourcen) + "</tr>"
+    for spieler in ["Spieler 1", "Spieler 2"]:
+        res_table += f"<tr><td><b>{spieler}</b></td>" + "".join(
+            f"<td>{spieler_ressourcen[spieler][res]}</td>" for res in resourcen
+        ) + "</tr>"
+    res_table += "</table>"
+    st.markdown(res_table, unsafe_allow_html=True)
+
+    # Kartenpyramide
+    layout_structure = [2, 3, 4, 5, 6]
+    sample_cards = load_cards_from_json()
+    cards_by_row = []
+    card_id = 0
+
+    for row_idx, cards_in_row in enumerate(layout_structure):
+        row = []
+        is_open_row = row_idx % 2 == 0  # Offen in 0, 2, 4
+        for _ in range(cards_in_row):
+            card = sample_cards[card_id % len(sample_cards)]
+            effekt_text = f'{card["effekt"]["value"]}× {card["effekt"]["name"]}'
+            row.append({
+                "name": card["name"],
+                "effekt": effekt_text,
+                "offen": is_open_row
+            })
+            card_id += 1
+        cards_by_row.append(row)
+
+    # HTML
+    html = """
     <style>
     .pyramide {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 3px;
+        margin-top: 10px;
     }
     .reihe {
         display: flex;
-        gap: 10px;
-        justify-content: center;
+        gap: 3px;
     }
     .karte {
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 6px 4px;
-        width: 75px;
-        height: 90px;
+        border: 1px solid #555;
+        border-radius: 5px;
+        padding: 4px 3px;
+        min-width: 56px;
+        min-height: 66px;
         text-align: center;
         font-size: 10px;
-        box-shadow: 2px 2px 3px rgba(0,0,0,0.2);
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -63,29 +86,37 @@ def render_layout():
         color: #000;
     }
     .verdeckt {
-        background-color: #bbb;
-        color: #bbb;
+        background-color: #ccc;
+        color: #ccc;
     }
     </style>
-    """, unsafe_allow_html=True)
+    <div class="pyramide">
+    """
 
-    # Kartenanzeige in HTML
-    html = "<div class='pyramide'>"
-    for row in st.session_state.auslage:
-        html += "<div class='reihe'>"
+    for row in cards_by_row:
+        html += '<div class="reihe">'
         for card in row:
-            if card["genommen"]:
-                html += "<div class='karte verdeckt'></div>"
-            elif card["offen"]:
-                html += f"""
-                <div class='karte offen'>
-                    <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
-                    <div class='kartenname'>{card['name']}</div>
-                </div>
-                """
+            status = "offen" if card["offen"] else "verdeckt"
+            if card["offen"]:
+                content = f'<div class="produziert">{card["effekt"]}</div><div class="kartenname">{card["name"]}</div>'
             else:
-                html += "<div class='karte verdeckt'></div>"
-        html += "</div>"
-    html += "</div>"
+                content = '<div class="produziert"></div><div class="kartenname"></div>'
+            html += f'<div class="karte {status}">{content}</div>'
+        html += '</div>'
+    html += '</div>'
 
-    components.html(html, height=740, scrolling=False)
+    components.html(html, height=560, scrolling=False)
+
+
+def load_cards_from_json():
+    path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
+    with open(path, encoding="utf-8") as f:
+        cards = json.load(f)
+
+    for i, card in enumerate(cards):
+        if "name" not in card or "effekt" not in card:
+            raise ValueError(f"Karte {i+1} fehlt 'name' oder 'effekt'")
+        if "name" not in card["effekt"] or "value" not in card["effekt"]:
+            raise ValueError(f"Karte {i+1} hat unvollständigen Effekt")
+
+    return cards
