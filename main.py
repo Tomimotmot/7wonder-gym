@@ -21,24 +21,33 @@ ressourcen_kürzel = {
     "Glas": "G"
 }
 
-# Karten-Daten laden
-with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
-    karten_data = json.load(f)
+# Karten-Daten laden mit Fehlerbehandlung
+try:
+    with open("grundspiel_karten_zeitalter_1.json", "r", encoding="utf-8") as f:
+        karten_data = json.load(f)
+except FileNotFoundError:
+    st.error("❌ Datei 'grundspiel_karten_zeitalter_1.json' nicht gefunden.")
+    st.stop()
+except json.JSONDecodeError:
+    st.error("❌ JSON-Datei ist fehlerhaft.")
+    st.stop()
 
-# State vorbereiten
+# Session State vorbereiten
 if "gezogen" not in st.session_state:
     st.session_state.gezogen = set()
 if "last_reward" not in st.session_state:
     st.session_state.last_reward = None
 
-# Klick-Auswertung über Query
+# Klick-Auswertung (über URL-Query)
 clicked = st.query_params.get("click", [None])[0]
 if clicked and clicked.isdigit():
     k_id = int(clicked)
-    if k_id not in st.session_state.gezogen:
-        st.session_state.gezogen.add(k_id)
-        st.session_state.last_reward = karten_data[k_id].get("produziert", "❌ nichts")
-    st.query_params.clear()  # Klick aus der URL entfernen
+    if 0 <= k_id < len(karten_data):
+        if k_id not in st.session_state.gezogen:
+            st.session_state.gezogen.add(k_id)
+            karte = karten_data[k_id]
+            st.session_state.last_reward = karte.get("produziert", "❌ nichts")
+    st.query_params.clear()
 
 # CSS-Styling
 st.markdown("""
@@ -134,12 +143,13 @@ for row in karten_layout:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Letzter Reward
+# Letzter Reward anzeigen
 if st.session_state.last_reward:
     st.markdown(f"### 🎁 Letzter Reward: `{st.session_state.last_reward}`")
 
-# Reset
+# Reset-Button
 if st.button("🔄 Spiel zurücksetzen"):
     st.session_state.gezogen.clear()
     st.session_state.last_reward = None
     st.experimental_rerun()
+
