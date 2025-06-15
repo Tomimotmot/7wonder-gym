@@ -1,3 +1,5 @@
+# === layout.py (Pyramidenlayout mit QueryParam-Click-Handling) ===
+
 import streamlit as st
 import json
 from pathlib import Path
@@ -6,7 +8,7 @@ import streamlit.components.v1 as components
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # === 1. Initialisiere Session-State ===
+    # === 1. Initialisiere Session-State für Spieler, Ressourcen, genommene Karten ===
     if "spieler" not in st.session_state:
         st.session_state.spieler = "Spieler 1"
 
@@ -20,10 +22,7 @@ def render_layout():
     if "genommene_karten" not in st.session_state:
         st.session_state.genommene_karten = set()
 
-    if "klick" not in st.session_state:
-        st.session_state.klick = None
-
-    # === 2. Ressourcenanzeige ===
+    # === 2. Zeige Ressourcenübersicht an ===
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
     st.markdown(f"### Ressourcenübersicht (aktuell: {st.session_state.spieler})")
     res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
@@ -35,12 +34,12 @@ def render_layout():
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # === 3. Kartenlayout ===
+    # === 3. Kartenlayout definieren (z. B. Pyramide mit 2–3–4–5–6 Karten) ===
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    # === 4. HTML + JS Rendering ===
+    # === 4. CSS & JS ===
     html = """
     <style>
     .pyramide {
@@ -89,20 +88,15 @@ def render_layout():
     </style>
     <script>
     function sendClick(card_id) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'klick';
-        input.value = card_id;
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
+        const url = new URL(window.location.href);
+        url.searchParams.set('click', card_id);
+        window.location.href = url.toString();
     }
     </script>
     <div class='pyramide'>
     """
 
+    # === 5. Karten darstellen ===
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
         is_open_row = row_idx % 2 == 0
@@ -124,25 +118,26 @@ def render_layout():
                 html += "<div class='karte verdeckt'>???</div>"
 
             card_id += 1
+
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=700, scrolling=False)
+    components.html(html, height=720, scrolling=False)
 
-    # === 5. Klickverarbeitung ===
-    if st.session_state.klick is not None:
+    # === 6. Klickverarbeitung via Query-Param ===
+    params = st.experimental_get_query_params()
+    if "click" in params:
         try:
-            clicked_id = int(st.session_state.klick)
+            clicked_id = int(params["click"][0])
             if clicked_id not in st.session_state.genommene_karten:
                 card = sample_cards[clicked_id % len(sample_cards)]
                 st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
                 st.session_state.genommene_karten.add(clicked_id)
                 st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-        except:
-            pass
-        st.session_state.klick = None
-        st.experimental_rerun()
-
+            st.experimental_set_query_params()  # Reset param
+            st.experimental_rerun()
+        except Exception as e:
+            st.error(f"Fehler beim Klick: {e}")
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
