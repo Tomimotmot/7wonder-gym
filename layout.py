@@ -17,42 +17,75 @@ def render_ressourcen():
 def render_layout():
     st.markdown(f"## 🃏 Zeitalter I – Auslage ({st.session_state.spieler} ist am Zug)")
 
-    html = """
+    st.markdown("""
     <style>
-    .pyramide { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; }
-    .reihe { display: flex; gap: 4px; }
+    .pyramide {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-top: 20px;
+    }
+    .reihe {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+    }
     .karte {
         border: 1px solid #555;
         border-radius: 6px;
-        padding: 4px 4px;
-        min-width: 60px;
-        min-height: 68px;
+        padding: 4px;
+        width: 70px;
+        height: 72px;
         text-align: center;
         font-size: 10px;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        background-color: #fff;
+        color: #000;
     }
-    .produziert { font-size: 10px; font-weight: bold; padding-bottom: 2px; }
-    .kartenname { font-size: 9px; font-style: italic; padding-top: 2px; }
-    .offen { background-color: #fff; color: #000; }
-    .verdeckt { background-color: #ccc; color: #ccc; }
+    .verdeckt {
+        background-color: #ccc !important;
+        color: #ccc !important;
+    }
+    .produziert {
+        font-size: 10px;
+        font-weight: bold;
+        padding-bottom: 2px;
+    }
+    .kartenname {
+        font-size: 9px;
+        font-style: italic;
+        padding-top: 2px;
+    }
     </style>
-    """
-    st.markdown(html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+    html = "<div class='pyramide'>"
 
     for row in st.session_state.auslage:
-        cols = st.columns(len(row), gap="small")
-        for col, card in zip(cols, row):
-            with col:
-                if card["genommen"]:
-                    st.empty()
-                elif card["offen"]:
-                    if st.button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=card["id"]):
-                        st.session_state.ressourcen[st.session_state.spieler][card["effekt"]["name"]] += card["effekt"]["value"]
-                        card["genommen"] = True
-                        st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                        st.experimental_rerun()
-                else:
-                    st.markdown('<div class="karte verdeckt"></div>', unsafe_allow_html=True)
+        html += "<div class='reihe'>"
+        for card in row:
+            if card["genommen"]:
+                html += "<div style='width: 70px; height: 72px;'></div>"
+            elif card["offen"]:
+                html += f'''
+                <form method="post">
+                    <button name="click" value="{card['id']}" type="submit" class="karte">
+                        <div class="produziert">{card["effekt"]["value"]}× {card["effekt"]["name"]}</div>
+                        <div class="kartenname">{card["name"]}</div>
+                    </button>
+                </form>
+                '''
+            else:
+                html += "<div class='karte verdeckt'></div>"
+        html += "</div>"
+    html += "</div>"
+
+    st.markdown(html, unsafe_allow_html=True)
+
+    # POST-Auswertung für Button-Click
+    if "click" in st.session_state:
+        handle_card_click(int(st.session_state.click))
