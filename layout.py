@@ -101,7 +101,7 @@ def load_cards_from_json():
     Lädt die Kartendaten aus der Datei 'zeitalter1.json' und prüft auf Vollständigkeit.
     Erwartet: Felder 'name' und 'produziert' je Karte.
     """
-    path = Path(__file__).parent / "grundspielspiel_zeitalter_1.json"
+    path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
     with open(path, encoding="utf-8") as f:
         cards = json.load(f)
 
