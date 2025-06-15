@@ -1,4 +1,7 @@
+# === layout.py (Finale HTML-Variante mit funktionierendem Klick) ===
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 def render_ressourcen():
     st.markdown("### Ressourcen")
@@ -52,6 +55,8 @@ def render_layout():
     }
     .produziert { font-size: 10px; font-weight: bold; padding-bottom: 2px; }
     .kartenname { font-size: 9px; font-style: italic; padding-top: 2px; }
+    form { margin: 0; }
+    button.karte { all: unset; cursor: pointer; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -76,16 +81,16 @@ def render_layout():
         html += "</div>"
     html += "</div>"
 
-    st.markdown(html, unsafe_allow_html=True)
+    components.html(html, height=650, scrolling=False)
 
-    # Button-Handling
-    if st.session_state.get("click"):
-        clicked_id = int(st.session_state.click)
+    if st.experimental_get_query_params().get("click"):
+        clicked_id = int(st.experimental_get_query_params()["click"][0])
         for row in st.session_state.auslage:
             for card in row:
                 if card["id"] == clicked_id and not card["genommen"] and card["offen"]:
-                    st.session_state.ressourcen[st.session_state.spieler][card["effekt"]["name"]] += card["effekt"]["value"]
+                    effekt = card["effekt"]
+                    st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
                     card["genommen"] = True
                     st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                    st.session_state.click = None
+                    st.experimental_set_query_params()  # Reset params
                     st.experimental_rerun()
