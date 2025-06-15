@@ -1,4 +1,4 @@
-# === layout.py (Pyramiden-Layout final mit Klick-Handling, wie Screenshot) ===
+# === layout.py (Final mit st.form-Klickhandling & stabilem Pyramidenlayout) ===
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -65,47 +65,33 @@ def render_layout():
         background-color: #bbb;
         color: #bbb;
     }
-    form { margin: 0; }
-    button.karte { all: unset; cursor: pointer; }
     </style>
     """, unsafe_allow_html=True)
 
     html = "<div class='pyramide'>"
 
-    for row in st.session_state.auslage:
+    for row_index, row in enumerate(st.session_state.auslage):
         html += "<div class='reihe'>"
         for card in row:
             if card["genommen"]:
                 html += "<div class='karte verdeckt'></div>"
             elif card["offen"]:
-                html += f'''
-                <form method="post">
-                    <button name="click" value="{card['id']}" type="submit" class="karte offen">
-                        <div class="produziert">{card["effekt"]["value"]}× {card["effekt"]["name"]}</div>
-                        <div class="kartenname">{card["name"]}</div>
-                    </button>
-                </form>
-                '''
+                button_key = f"karte_{card['id']}"
+                clicked = st.button(
+                    label=f"\n{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}",
+                    key=button_key,
+                    help=card["name"],
+                )
+                if clicked:
+                    effekt = card["effekt"]
+                    st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
+                    card["genommen"] = True
+                    st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+                    st.experimental_rerun()
+                html += f"<div class='karte offen'><div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div><div class='kartenname'>{card['name']}</div></div>"
             else:
                 html += "<div class='karte verdeckt'></div>"
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=660, scrolling=False)
-
-    # Klickhandling über session_state
-    if st.session_state.get("click"):
-        clicked_id = int(st.session_state.click)
-        for row in st.session_state.auslage:
-            for card in row:
-                if card["id"] == clicked_id and not card["genommen"] and card["offen"]:
-                    effekt = card["effekt"]
-                    st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
-                    card["genommen"] = True
-                    st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                    st.session_state.click = None
-                    st.experimental_rerun()
-
-    # Klick-Input setzen (muss im Hauptskript abgefangen und in session_state.click gespeichert werden)
-    if "click" not in st.session_state:
-        st.session_state.click = None
+    components.html(html, height=680, scrolling=False)
