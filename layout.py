@@ -1,4 +1,4 @@
-# === layout.py (Finale HTML-Variante mit funktionierendem Klick) ===
+# === layout.py (Pyramiden-Layout final mit Klick-Handling, wie Screenshot) ===
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -18,7 +18,7 @@ def render_ressourcen():
     st.markdown(table, unsafe_allow_html=True)
 
 def render_layout():
-    st.markdown(f"## 🃏 Zeitalter I – Auslage ({st.session_state.spieler} ist am Zug)")
+    st.markdown(f"## 🃏 Zeitalter I – Kartenauslage ({st.session_state.spieler} ist am Zug)")
 
     st.markdown("""
     <style>
@@ -37,24 +37,34 @@ def render_layout():
     .karte {
         border: 1px solid #555;
         border-radius: 6px;
-        padding: 4px;
+        padding: 4px 3px;
         width: 70px;
-        height: 72px;
+        height: 76px;
         text-align: center;
-        font-size: 10px;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        font-size: 10.5px;
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.15);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+    }
+    .produziert {
+        font-size: 10px;
+        font-weight: bold;
+        padding-bottom: 2px;
+    }
+    .kartenname {
+        font-size: 9px;
+        font-style: italic;
+        padding-top: 2px;
+    }
+    .offen {
         background-color: #fff;
         color: #000;
     }
     .verdeckt {
-        background-color: #ccc !important;
-        color: #ccc !important;
+        background-color: #bbb;
+        color: #bbb;
     }
-    .produziert { font-size: 10px; font-weight: bold; padding-bottom: 2px; }
-    .kartenname { font-size: 9px; font-style: italic; padding-top: 2px; }
     form { margin: 0; }
     button.karte { all: unset; cursor: pointer; }
     </style>
@@ -70,7 +80,7 @@ def render_layout():
             elif card["offen"]:
                 html += f'''
                 <form method="post">
-                    <button name="click" value="{card['id']}" type="submit" class="karte">
+                    <button name="click" value="{card['id']}" type="submit" class="karte offen">
                         <div class="produziert">{card["effekt"]["value"]}× {card["effekt"]["name"]}</div>
                         <div class="kartenname">{card["name"]}</div>
                     </button>
@@ -81,10 +91,11 @@ def render_layout():
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=650, scrolling=False)
+    components.html(html, height=660, scrolling=False)
 
-    if st.experimental_get_query_params().get("click"):
-        clicked_id = int(st.experimental_get_query_params()["click"][0])
+    # Klickhandling über session_state
+    if st.session_state.get("click"):
+        clicked_id = int(st.session_state.click)
         for row in st.session_state.auslage:
             for card in row:
                 if card["id"] == clicked_id and not card["genommen"] and card["offen"]:
@@ -92,5 +103,9 @@ def render_layout():
                     st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
                     card["genommen"] = True
                     st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                    st.experimental_set_query_params()  # Reset params
+                    st.session_state.click = None
                     st.experimental_rerun()
+
+    # Klick-Input setzen (muss im Hauptskript abgefangen und in session_state.click gespeichert werden)
+    if "click" not in st.session_state:
+        st.session_state.click = None
