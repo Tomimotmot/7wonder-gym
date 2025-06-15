@@ -1,4 +1,4 @@
-# === layout.py (Pyramidenlayout im echten Spielstil, optimiert) ===
+# === layout.py (Pyramidenlayout mit Spielerwechsel und Ressourcenvergabe – alles in einer Datei, gut kommentiert) ===
 
 import streamlit as st
 import json
@@ -8,28 +8,38 @@ import streamlit.components.v1 as components
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # Ressourcenübersicht (statisch)
-    resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
-    spieler_ressourcen = {
-        "Spieler 1": {res: 0 for res in resourcen},
-        "Spieler 2": {res: 0 for res in resourcen}
-    }
+    # === 1. Initialisiere Session-State für Spieler, Ressourcen, genommene Karten ===
+    if "spieler" not in st.session_state:
+        st.session_state.spieler = "Spieler 1"
 
-    st.markdown("### Ressourcenübersicht")
+    if "ressourcen" not in st.session_state:
+        res = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
+        st.session_state.ressourcen = {
+            "Spieler 1": {r: 0 for r in res},
+            "Spieler 2": {r: 0 for r in res},
+        }
+
+    if "genommene_karten" not in st.session_state:
+        st.session_state.genommene_karten = set()
+
+    # === 2. Zeige Ressourcenübersicht an ===
+    resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
+    st.markdown(f"### Ressourcenübersicht (aktuell: {st.session_state.spieler})")
     res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
     res_table += "<tr><th></th>" + "".join(f"<th>{res}</th>" for res in resourcen) + "</tr>"
     for spieler in ["Spieler 1", "Spieler 2"]:
         res_table += f"<tr><td><b>{spieler}</b></td>" + "".join(
-            f"<td>{spieler_ressourcen[spieler][res]}</td>" for res in resourcen
+            f"<td>{st.session_state.ressourcen[spieler][res]}</td>" for res in resourcen
         ) + "</tr>"
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # Kartenpyramide mit echtem Versatz-Layout (zentriert mit flex)
+    # === 3. Kartenlayout definieren (z. B. Pyramide mit 2–3–4–5–6 Karten) ===
     layout_structure = [2, 3, 4, 5, 6]
     sample_cards = load_cards_from_json()
     card_id = 0
 
+    # === 4. CSS für Kartenlayout ===
     html = """
     <style>
     .pyramide {
@@ -78,12 +88,31 @@ def render_layout():
     <div class='pyramide'>
     """
 
+    # === 5. Karten darstellen & Buttons erzeugen ===
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
-        is_open_row = row_idx % 2 == 0
-        for _ in range(cards_in_row):
+        is_open_row = row_idx % 2 == 0  # Offen nur in geraden Reihen
+
+        for i in range(cards_in_row):
             card = sample_cards[card_id % len(sample_cards)]
-            if is_open_row:
+            is_taken = card_id in st.session_state.genommene_karten
+
+            if is_taken:
+                html += "<div class='karte verdeckt'>✓</div>"
+
+            elif is_open_row:
+                # Button (sichtbar und klickbar)
+                if st.button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=f"btn_{card_id}"):
+                    # === SPIELLOGIK: Ressourcen dem Spieler geben ===
+                    res_typ = card['effekt']['name']
+                    res_val = card['effekt']['value']
+                    st.session_state.ressourcen[st.session_state.spieler][res_typ] += res_val
+
+                    # Karte als genommen markieren & Spielerwechsel
+                    st.session_state.genommene_karten.add(card_id)
+                    st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+                    st.experimental_rerun()
+
                 html += f"""
                 <div class='karte offen'>
                     <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
@@ -91,12 +120,15 @@ def render_layout():
                 </div>
                 """
             else:
+                # Verdeckte Karte (nicht klickbar)
                 html += "<div class='karte verdeckt'>???</div>"
+
             card_id += 1
+
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=600, scrolling=False)
+    components.html(html, height=700, scrolling=False)
 
 
 def load_cards_from_json():
