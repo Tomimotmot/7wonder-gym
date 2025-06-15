@@ -1,4 +1,4 @@
-# === layout.py (Pyramidenlayout mit Spielerwechsel und Ressourcenvergabe – alles in einer Datei, gut kommentiert) ===
+# === layout.py (Pyramidenlayout mit Spielerwechsel und Ressourcenvergabe – sauberes Rendering ohne doppelte Buttons) ===
 
 import streamlit as st
 import json
@@ -22,6 +22,9 @@ def render_layout():
     if "genommene_karten" not in st.session_state:
         st.session_state.genommene_karten = set()
 
+    if "klick" not in st.session_state:
+        st.session_state.klick = None
+
     # === 2. Zeige Ressourcenübersicht an ===
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
     st.markdown(f"### Ressourcenübersicht (aktuell: {st.session_state.spieler})")
@@ -39,7 +42,7 @@ def render_layout():
     sample_cards = load_cards_from_json()
     card_id = 0
 
-    # === 4. CSS für Kartenlayout ===
+    # === 4. CSS & JS ===
     html = """
     <style>
     .pyramide {
@@ -65,6 +68,7 @@ def render_layout():
         justify-content: space-between;
         text-align: center;
         box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        cursor: pointer;
     }
     .offen {
         background-color: #fff;
@@ -85,13 +89,26 @@ def render_layout():
         font-style: italic;
     }
     </style>
+    <script>
+    function sendClick(card_id) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'klick';
+        input.value = card_id;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+    </script>
     <div class='pyramide'>
     """
 
-    # === 5. Karten darstellen & Buttons erzeugen ===
+    # === 5. Karten darstellen ===
     for row_idx, cards_in_row in enumerate(layout_structure):
         html += "<div class='reihe'>"
-        is_open_row = row_idx % 2 == 0  # Offen nur in geraden Reihen
+        is_open_row = row_idx % 2 == 0
 
         for i in range(cards_in_row):
             card = sample_cards[card_id % len(sample_cards)]
@@ -101,26 +118,13 @@ def render_layout():
                 html += "<div class='karte verdeckt'>✓</div>"
 
             elif is_open_row:
-                # Button (sichtbar und klickbar)
-                if st.button(f"{card['effekt']['value']}× {card['effekt']['name']}\n{card['name']}", key=f"btn_{card_id}"):
-                    # === SPIELLOGIK: Ressourcen dem Spieler geben ===
-                    res_typ = card['effekt']['name']
-                    res_val = card['effekt']['value']
-                    st.session_state.ressourcen[st.session_state.spieler][res_typ] += res_val
-
-                    # Karte als genommen markieren & Spielerwechsel
-                    st.session_state.genommene_karten.add(card_id)
-                    st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                    st.experimental_rerun()
-
                 html += f"""
-                <div class='karte offen'>
+                <div class='karte offen' onclick=\"sendClick({card_id})\">
                     <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
                     <div class='kartenname'>{card['name']}</div>
                 </div>
                 """
             else:
-                # Verdeckte Karte (nicht klickbar)
                 html += "<div class='karte verdeckt'>???</div>"
 
             card_id += 1
@@ -130,6 +134,19 @@ def render_layout():
 
     components.html(html, height=700, scrolling=False)
 
+    # === 6. Klickverarbeitung ===
+    if st.session_state.klick is not None:
+        try:
+            clicked_id = int(st.session_state.klick)
+            if clicked_id not in st.session_state.genommene_karten:
+                card = sample_cards[clicked_id % len(sample_cards)]
+                st.session_state.ressourcen[st.session_state.spieler][card['effekt']['name']] += card['effekt']['value']
+                st.session_state.genommene_karten.add(clicked_id)
+                st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
+        except:
+            pass
+        st.session_state.klick = None
+        st.experimental_rerun()
 
 def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
