@@ -1,5 +1,19 @@
 import streamlit as st
 
+def render_ressourcen():
+    st.markdown("### Ressourcen")
+    resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
+    table = "<table style='width:100%; text-align:center;'>"
+    table += "<tr><th></th>" + "".join(f"<th>{r}</th>" for r in resourcen) + "</tr>"
+    for spieler in ["Spieler 1", "Spieler 2"]:
+        table += f"<tr><td><b>{spieler}</b></td>"
+        for r in resourcen:
+            val = st.session_state.ressourcen[spieler][r]
+            table += f"<td>{val}</td>"
+        table += "</tr>"
+    table += "</table>"
+    st.markdown(table, unsafe_allow_html=True)
+
 def render_layout():
     st.markdown(f"## 🃏 Zeitalter I – Auslage ({st.session_state.spieler} ist am Zug)")
 
