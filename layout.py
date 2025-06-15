@@ -1,4 +1,4 @@
-# === layout.py (Final mit Klickhandling & stabilem Pyramidenlayout – überarbeitet) ===
+# === layout.py (Pyramiden-Layout final mit Klick-Handling) ===
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -18,8 +18,9 @@ def render_ressourcen():
     st.markdown(table, unsafe_allow_html=True)
 
 def render_layout():
-    st.markdown(f"## 🃏 Zeitalter I – Kartenauslage ({st.session_state.spieler} ist am Zug)")
+    st.markdown(f"## 🃏 Zeitalter I – Auslage ({st.session_state.spieler} ist am Zug)")
 
+    # CSS + Layout-Template
     st.markdown("""
     <style>
     .pyramide {
@@ -35,71 +36,86 @@ def render_layout():
         justify-content: center;
     }
     .karte {
-        border: 1px solid #555;
-        border-radius: 8px;
-        padding: 6px 4px;
         width: 70px;
-        height: 85px;
+        height: 90px;
+        border-radius: 6px;
+        border: 1px solid #555;
+        padding: 6px 4px;
+        font-size: 11px;
         text-align: center;
-        font-size: 10px;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+        background-color: #fff;
+        color: #000;
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }
-    .produziert {
-        font-size: 10px;
-        font-weight: bold;
-        padding-bottom: 2px;
+    .verdeckt {
+        background-color: #bbb !important;
+        color: #bbb !important;
     }
-    .kartenname {
-        font-size: 9px;
-        font-style: italic;
-        padding-top: 2px;
-    }
-    .offen {
+    .produziert { font-weight: bold; font-size: 11px; padding-bottom: 2px; }
+    .kartenname { font-size: 10px; font-style: italic; padding-top: 2px; }
+    form { margin: 0; }
+    button.karte {
+        all: unset;
+        width: 70px;
+        height: 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-radius: 6px;
+        border: 1px solid #555;
+        padding: 6px 4px;
         background-color: #fff;
         color: #000;
-    }
-    .verdeckt {
-        background-color: #bbb;
-        color: #bbb;
+        text-align: center;
+        font-size: 11px;
+        cursor: pointer;
     }
     </style>
     """, unsafe_allow_html=True)
 
+    # HTML-Rendering vorbereiten
     html = "<div class='pyramide'>"
-
-    for row_index, row in enumerate(st.session_state.auslage):
+    for row in st.session_state.auslage:
         html += "<div class='reihe'>"
         for card in row:
             if card["genommen"]:
                 html += "<div class='karte verdeckt'></div>"
             elif card["offen"]:
-                html += f"""
-                <form method='post'>
-                    <input type='hidden' name='click' value='{card['id']}'/>
-                    <button class='karte offen' type='submit'>
-                        <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
-                        <div class='kartenname'>{card['name']}</div>
+                html += f'''
+                <form method="post">
+                    <button name="click" value="{card['id']}" type="submit" class="karte">
+                        <div class="produziert">{card['effekt']['value']}× {card['effekt']['name']}</div>
+                        <div class="kartenname">{card['name']}</div>
                     </button>
                 </form>
-                """
+                '''
             else:
                 html += "<div class='karte verdeckt'></div>"
         html += "</div>"
     html += "</div>"
 
-    components.html(html, height=700, scrolling=False)
+    components.html(html, height=600, scrolling=False)
 
-    # Klick auswerten
-    if st.session_state.get("click"):
-        clicked_id = int(st.session_state.click)
+    # Klick-Verarbeitung via Session State (kein query param)
+    if "_clicked" not in st.session_state:
+        st.session_state._clicked = None
+
+    if st.session_state._clicked:
+        clicked_id = int(st.session_state._clicked)
         for row in st.session_state.auslage:
             for card in row:
                 if card["id"] == clicked_id and not card["genommen"] and card["offen"]:
-                    st.session_state.ressourcen[st.session_state.spieler][card["effekt"]["name"]] += card["effekt"]["value"]
+                    effekt = card["effekt"]
+                    st.session_state.ressourcen[st.session_state.spieler][effekt["name"]] += effekt["value"]
                     card["genommen"] = True
                     st.session_state.spieler = "Spieler 2" if st.session_state.spieler == "Spieler 1" else "Spieler 1"
-                    st.session_state.click = None
+                    st.session_state._clicked = None
                     st.experimental_rerun()
+
+    # POST-Klick-Auswertung (über hidden input abgefangen)
+    if st.requested_url_query_params.get("click"):
+        st.session_state._clicked = st.requested_url_query_params.get("click")[0]
+        st.experimental_set_query_params()  # reset params
