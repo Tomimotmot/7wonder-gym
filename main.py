@@ -6,7 +6,6 @@ st.set_page_config(page_title="7 Wonders Duel", layout="centered")
 
 def main():
     init_game()
-    render_ressourcen()
     render_layout()
 
 if __name__ == "__main__":
