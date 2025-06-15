@@ -25,32 +25,35 @@ def render_layout():
         cards_by_row.append(row)
 
     # HTML/CSS + Kartenanzeige
-    html = """
+        html = """
     <style>
     .pyramide {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         margin-top: 10px;
     }
     .reihe {
         display: flex;
-        gap: 6px;
+        gap: 4px;
     }
     .karte {
-        background-color: #f0f0f0;
         border: 1px solid #555;
-        border-radius: 8px;
-        padding: 6px;
-        min-width: 60px;
-        min-height: 70px;
+        border-radius: 6px;
+        padding: 4px;
+        min-width: 48px;
+        min-height: 60px;
         text-align: center;
-        font-size: 12px;
-        box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        font-size: 11px;
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .offen {
+        background-color: #fff;
+        color: #000;
     }
     .verdeckt {
-        background-color: #aaa;
+        background-color: #bbb;
         color: #333;
     }
     </style>
@@ -59,13 +62,9 @@ def render_layout():
     for row in cards_by_row:
         html += '<div class="reihe">'
         for card in row:
-            cls = "karte"
-            if not card["is_open"]:
-                cls += " verdeckt"
-                content = "<div>🕳</div><div>???</div>"
-            else:
-                content = f"<div>{card['ressource']}</div><div>{card['name']}</div>"
-            html += f'<div class="{cls}">{content}</div>'
+            status = "offen" if card["is_open"] else "verdeckt"
+            content = f"<div>{card['ressource']}</div><div>{card['name'] if card['is_open'] else '???'}</div>"
+            html += f'<div class="karte {status}">{content}</div>'
         html += '</div>'
     html += '</div>'
 
