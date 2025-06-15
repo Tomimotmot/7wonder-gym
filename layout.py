@@ -2,58 +2,49 @@ import streamlit as st
 import json
 from pathlib import Path
 
-
 def render_layout():
     st.markdown("## 🃏 Zeitalter I – Kartenauslage")
 
-    # Ressourcenübersicht (statisch)
+    # Ressourcenübersicht
     resourcen = ["Holz", "Lehm", "Stein", "Papyrus", "Glas"]
-    spieler_ressourcen = {
-        "Spieler 1": {res: 0 for res in resourcen},
-        "Spieler 2": {res: 0 for res in resourcen}
-    }
-
     st.markdown("### Ressourcenübersicht")
-    res_table = "<table style='width: 100%; text-align: center; border-collapse: collapse;'>"
-    res_table += "<tr><th></th>" + "".join(f"<th>{res}</th>" for res in resourcen) + "</tr>"
-    for spieler in ["Spieler 1", "Spieler 2"]:
-        res_table += f"<tr><td><b>{spieler}</b></td>" + "".join(
-            f"<td>{spieler_ressourcen[spieler][res]}</td>" for res in resourcen
-        ) + "</tr>"
+    res_table = "<table style='width: 100%; text-align: center;'>"
+    res_table += "<tr><th></th>" + "".join(f"<th>{r}</th>" for r in resourcen) + "</tr>"
+    for sp in ["Spieler 1", "Spieler 2"]:
+        res_table += f"<tr><td><b>{sp}</b></td>" + "".join(f"<td>0</td>" for _ in resourcen) + "</tr>"
     res_table += "</table>"
     st.markdown(res_table, unsafe_allow_html=True)
 
-    # Layout: Pyramidenstruktur wie im echten Spiel (2-3-4-5-6)
+    # Karten laden
+    cards = load_cards_from_json()
     layout_structure = [2, 3, 4, 5, 6]
-    sample_cards = load_cards_from_json()
-    card_id = 0
+    card_index = 0
 
-    # CSS Styling
     st.markdown("""
     <style>
     .pyramide {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
         margin-top: 20px;
+        gap: 4px;
     }
     .reihe {
-        display: flex;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(11, 1fr);
         gap: 6px;
     }
     .karte {
-        width: 60px;
-        height: 75px;
+        width: 64px;
+        height: 80px;
         border-radius: 6px;
-        padding: 4px;
         font-size: 10px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         text-align: center;
         box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        padding: 4px;
     }
     .offen {
         background-color: #fff;
@@ -65,25 +56,20 @@ def render_layout():
         color: #bbb;
         border: 1px solid #888;
     }
-    .produziert {
-        font-weight: bold;
-        font-size: 10px;
-    }
-    .kartenname {
-        font-size: 9px;
-        font-style: italic;
-    }
+    .produziert { font-weight: bold; font-size: 10px; }
+    .kartenname { font-size: 9px; font-style: italic; }
+    .leer { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
-    # HTML Pyramide
     html = "<div class='pyramide'>"
-    for row_idx, cards_in_row in enumerate(layout_structure):
+    for i, anzahl in enumerate(layout_structure):
         html += "<div class='reihe'>"
-        is_open_row = row_idx % 2 == 0
-        for _ in range(cards_in_row):
-            card = sample_cards[card_id % len(sample_cards)]
-            if is_open_row:
+        leer = (11 - anzahl) // 2
+        html += "<div class='karte leer'></div>" * leer
+        for _ in range(anzahl):
+            card = cards[card_index % len(cards)]
+            if i % 2 == 0:
                 html += f"""
                 <div class='karte offen'>
                     <div class='produziert'>{card['effekt']['value']}× {card['effekt']['name']}</div>
@@ -92,7 +78,8 @@ def render_layout():
                 """
             else:
                 html += "<div class='karte verdeckt'>???</div>"
-            card_id += 1
+            card_index += 1
+        html += "<div class='karte leer'></div>" * leer
         html += "</div>"
     html += "</div>"
 
@@ -103,11 +90,4 @@ def load_cards_from_json():
     path = Path(__file__).parent / "grundspiel_karten_zeitalter_1.json"
     with open(path, encoding="utf-8") as f:
         cards = json.load(f)
-
-    for i, card in enumerate(cards):
-        if "name" not in card or "effekt" not in card:
-            raise ValueError(f"Karte {i+1} fehlt 'name' oder 'effekt'")
-        if "name" not in card["effekt"] or "value" not in card["effekt"]:
-            raise ValueError(f"Karte {i+1} hat unvollständigen Effekt")
-
     return cards
