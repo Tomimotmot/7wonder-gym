@@ -78,3 +78,35 @@
   margin-top: 1rem;
   font-size: 1.2rem;
 }
+
+
+/* ===== Mobile Optimierung ===== */
+@media (max-width: 600px) {
+  .karte {
+    width: 70px;
+    height: 90px;
+    font-size: 0.7rem;
+    padding: 0.3rem;
+  }
+
+  .kartenname {
+    font-size: 0.6rem;
+  }
+
+  .karte-produziert {
+    font-size: 0.6rem;
+  }
+
+  .karten-auslage {
+    margin: 1rem;
+    gap: 0.5rem;
+  }
+
+  .reihe {
+    gap: 0.3rem;
+  }
+
+  .belohnung {
+    font-size: 1rem;
+  }
+}
