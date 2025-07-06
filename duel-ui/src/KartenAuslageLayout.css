@@ -2,37 +2,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 1rem auto;
-  gap: 0.6rem;
-  max-width: 100vw;
-  padding: 0 0.3rem;
+  gap: 0.4rem;
+  padding: 1rem;
 }
 
 .reihe {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .karte {
   width: 70px;
-  height: 95px;
+  height: 100px;
   border-radius: 6px;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   background-color: #f3f3f3;
   color: #333;
   padding: 0.3rem;
   cursor: pointer;
+  word-break: break-word;
   overflow: hidden;
 }
 
@@ -58,58 +56,18 @@
 }
 
 .karte-produziert {
-  font-size: 0.6rem;
-  font-weight: bold;
-  color: #333;
+  font-size: 0.65rem;
   position: absolute;
-  top: 3px;
+  top: 4px;
 }
 
 .kartenname {
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   padding: 0 0.2rem;
-  color: #000;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
   text-align: center;
   position: absolute;
-  bottom: 3px;
-  width: 90%;
-}
-
-.belohnung {
-  margin-top: 0.8rem;
-  font-size: 1rem;
-  text-align: center;
-}
-
-/* Mobile extra feinjustiert */
-@media (max-width: 500px) {
-  .karte {
-    width: 62px;
-    height: 85px;
-    font-size: 0.6rem;
-  }
-
-  .kartenname {
-    font-size: 0.5rem;
-    width: 95%;
-  }
-
-  .karte-produziert {
-    font-size: 0.5rem;
-  }
-
-  .karten-auslage {
-    gap: 0.5rem;
-  }
-
-  .reihe {
-    gap: 0.25rem;
-  }
-
-  .belohnung {
-    font-size: 0.9rem;
-  }
+  bottom: 4px;
+  color: #000;
+  white-space: normal;
+  line-height: 1.1;
 }
