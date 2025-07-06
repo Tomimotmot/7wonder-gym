@@ -2,40 +2,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 2rem;
-  gap: 1rem;
+  margin: 1rem auto;
+  gap: 0.6rem;
+  max-width: 100vw;
+  padding: 0 0.3rem;
 }
 
 .reihe {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
 .karte {
-  width: 100px;
-  height: 140px;
-  border-radius: 8px;
+  width: 70px;
+  height: 95px;
+  border-radius: 6px;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 0.65rem;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   background-color: #f3f3f3;
   color: #333;
-  padding: 0.5rem;
+  padding: 0.3rem;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .karte.offen {
   background-color: #fffdf5;
   border: 2px solid #4caf50;
-  color: #333;
 }
 
 .karte.verdeckt {
@@ -54,59 +57,59 @@
   pointer-events: none;
 }
 
-/* Oben: produziert */
 .karte-produziert {
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   font-weight: bold;
   color: #333;
   position: absolute;
-  top: 5px;
+  top: 3px;
 }
 
-/* Unten: Name */
 .kartenname {
-  font-size: 0.75rem;
-  padding: 0 0.3rem;
+  font-size: 0.55rem;
+  padding: 0 0.2rem;
   color: #000;
-  white-space: pre-wrap;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
   text-align: center;
   position: absolute;
-  bottom: 5px;
+  bottom: 3px;
+  width: 90%;
 }
 
 .belohnung {
-  margin-top: 1rem;
-  font-size: 1.2rem;
+  margin-top: 0.8rem;
+  font-size: 1rem;
+  text-align: center;
 }
 
-
-/* ===== Mobile Optimierung ===== */
-@media (max-width: 600px) {
+/* Mobile extra feinjustiert */
+@media (max-width: 500px) {
   .karte {
-    width: 70px;
-    height: 90px;
-    font-size: 0.7rem;
-    padding: 0.3rem;
+    width: 62px;
+    height: 85px;
+    font-size: 0.6rem;
   }
 
   .kartenname {
-    font-size: 0.6rem;
+    font-size: 0.5rem;
+    width: 95%;
   }
 
   .karte-produziert {
-    font-size: 0.6rem;
+    font-size: 0.5rem;
   }
 
   .karten-auslage {
-    margin: 1rem;
     gap: 0.5rem;
   }
 
   .reihe {
-    gap: 0.3rem;
+    gap: 0.25rem;
   }
 
   .belohnung {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
