@@ -13,8 +13,8 @@
 }
 
 .karte {
-  width: 70px;
-  height: 100px;
+  width: 55px;
+  height: 80px;
   border-radius: 6px;
   position: relative;
   display: flex;
@@ -22,16 +22,16 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   background-color: #f3f3f3;
   color: #333;
-  padding: 0.3rem;
+  padding: 0.2rem;
   cursor: pointer;
-  word-break: break-word;
   overflow: hidden;
+  line-height: 1.1;
 }
 
 .karte.offen {
@@ -56,18 +56,25 @@
 }
 
 .karte-produziert {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   position: absolute;
   top: 4px;
+  color: #000;
 }
 
 .kartenname {
-  font-size: 0.65rem;
-  padding: 0 0.2rem;
-  text-align: center;
+  font-size: 0.55rem;
   position: absolute;
   bottom: 4px;
   color: #000;
-  white-space: normal;
-  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90%;
+}
+
+.belohnung {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
 }
