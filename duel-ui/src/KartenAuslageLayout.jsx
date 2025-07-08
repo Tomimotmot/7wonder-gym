@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./KartenAuslageLayout.css";
 
-const KartenAuslageLayout = ({ layout, offenLayout }) => {
+const KartenAuslageLayout = ({ layout }) => {
   const [kartenData, setKartenData] = useState([]);
   const [gezogen, setGezogen] = useState([]);
-  const [lastReward, setLastReward] = useState(null);
-  const [spielerAmZug, setSpielerAmZug] = useState(1);
   const [ressourcenP1, setRessourcenP1] = useState([]);
   const [ressourcenP2, setRessourcenP2] = useState([]);
+  const [spieler, setSpieler] = useState(1);
+  const [lastReward, setLastReward] = useState(null);
 
   useEffect(() => {
     fetch("/grundspiel_karten_zeitalter_1.json")
@@ -15,26 +15,34 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
       .then((data) => setKartenData(data));
   }, []);
 
-  const handleCardClick = (cardIndex, offen) => {
-    if (!offen || gezogen.includes(cardIndex)) return;
+  const istOffen = (rowIndex, colIndex) => {
+    // Wenn es keine Zeile darunter gibt: immer offen
+    if (rowIndex === layout.length - 1) return true;
+
+    // Alle Karten darunter müssen gezogen worden sein
+    const untereReihe = layout[rowIndex + 1];
+    const unterLinks = layout[rowIndex + 1][colIndex] ?? null;
+    const unterRechts = layout[rowIndex + 1][colIndex + 1] ?? null;
+
+    return [unterLinks, unterRechts].every((idx) => idx == null || gezogen.includes(idx));
+  };
+
+  const handleCardClick = (cardIndex, rowIndex, colIndex) => {
+    if (!istOffen(rowIndex, colIndex) || gezogen.includes(cardIndex)) return;
 
     const gezogeneKarte = kartenData[cardIndex];
-    setGezogen([...gezogen, cardIndex]);
+    setGezogen((prev) => [...prev, cardIndex]);
 
-    // Belohnung zuweisen
-    const reward = gezogeneKarte.produziert || "❌ nichts";
-    setLastReward(`${reward} (Spieler ${spielerAmZug})`);
+    const res = gezogeneKarte?.produziert ?? "❌ nichts";
+    setLastReward(`${res} (Spieler ${spieler})`);
 
-    if (gezogeneKarte.produziert) {
-      if (spielerAmZug === 1) {
-        setRessourcenP1((prev) => [...prev, gezogeneKarte.produziert]);
-      } else {
-        setRessourcenP2((prev) => [...prev, gezogeneKarte.produziert]);
-      }
+    if (spieler === 1) {
+      setRessourcenP1((prev) => [...prev, res]);
+      setSpieler(2);
+    } else {
+      setRessourcenP2((prev) => [...prev, res]);
+      setSpieler(1);
     }
-
-    // Nächster Spieler ist am Zug
-    setSpielerAmZug(spielerAmZug === 1 ? 2 : 1);
   };
 
   return (
@@ -43,19 +51,17 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
         <div key={rowIndex} className="reihe">
           {reihe.map((cardIndex, colIndex) => {
             const card = kartenData[cardIndex];
-            const offen = offenLayout?.[rowIndex]?.[colIndex] === 1;
+            const offen = istOffen(rowIndex, colIndex);
             const istGezogen = gezogen.includes(cardIndex);
 
             return (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={`karte ${offen ? "offen" : "verdeckt"} ${istGezogen ? "gezogen" : ""}`}
-                onClick={() => handleCardClick(cardIndex, offen)}
+                onClick={() => handleCardClick(cardIndex, rowIndex, colIndex)}
               >
                 {offen && card?.produziert && (
-                  <div className="karte-produziert">
-                    {card.produziert.charAt(0)}
-                  </div>
+                  <div className="karte-produziert">{card.produziert.charAt(0)}</div>
                 )}
                 <div className="kartenname">{card?.name ?? ""}</div>
               </div>
@@ -70,12 +76,11 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
         </div>
       )}
 
-      <div style={{ marginTop: "2rem" }}>
+      <div style={{ marginTop: "1.5rem" }}>
         <h3>Spieler 1 Ressourcen:</h3>
-        <p>{ressourcenP1.length > 0 ? ressourcenP1.join(", ") : "–"}</p>
-
+        <div>{ressourcenP1.join(", ") || "–"}</div>
         <h3>Spieler 2 Ressourcen:</h3>
-        <p>{ressourcenP2.length > 0 ? ressourcenP2.join(", ") : "–"}</p>
+        <div>{ressourcenP2.join(", ") || "–"}</div>
       </div>
     </div>
   );
