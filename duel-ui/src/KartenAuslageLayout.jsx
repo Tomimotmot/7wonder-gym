@@ -5,6 +5,10 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
   const [kartenData, setKartenData] = useState([]);
   const [gezogen, setGezogen] = useState([]);
   const [lastReward, setLastReward] = useState(null);
+  const [activePlayer, setActivePlayer] = useState(1);
+
+  const [player1Ressourcen, setPlayer1Ressourcen] = useState([]);
+  const [player2Ressourcen, setPlayer2Ressourcen] = useState([]);
 
   useEffect(() => {
     fetch("/grundspiel_karten_zeitalter_1.json")
@@ -14,14 +18,24 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
 
   const handleCardClick = (cardIndex, offen) => {
     if (!offen || gezogen.includes(cardIndex)) return;
+
     const gezogeneKarte = kartenData[cardIndex];
     setGezogen([...gezogen, cardIndex]);
-    setLastReward(gezogeneKarte.produziert || "❌ nichts");
-    console.log("Gezogen:", gezogeneKarte.name, "→", gezogeneKarte.produziert);
+    setLastReward(`${gezogeneKarte.produziert || "❌ nichts"} (Spieler ${activePlayer})`);
+
+    if (activePlayer === 1) {
+      setPlayer1Ressourcen([...player1Ressourcen, gezogeneKarte.produziert]);
+      setActivePlayer(2);
+    } else {
+      setPlayer2Ressourcen([...player2Ressourcen, gezogeneKarte.produziert]);
+      setActivePlayer(1);
+    }
   };
 
   return (
     <div className="karten-auslage">
+      <h2>Aktiver Spieler: Spieler {activePlayer}</h2>
+
       {layout.map((reihe, rowIndex) => (
         <div key={rowIndex} className="reihe">
           {reihe.map((cardIndex, colIndex) => {
@@ -35,14 +49,11 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
                 className={`karte ${offen ? "offen" : "verdeckt"} ${istGezogen ? "gezogen" : ""}`}
                 onClick={() => handleCardClick(cardIndex, offen)}
               >
-                {/* Oben: Anfangsbuchstabe vom "produziert"-Wert */}
                 {offen && card?.produziert && (
                   <div className="karte-produziert">
                     {card.produziert.charAt(0)}
                   </div>
                 )}
-
-                {/* Unten: Name immer sichtbar */}
                 <div className="kartenname">
                   {card?.name ?? ""}
                 </div>
@@ -51,11 +62,17 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
           })}
         </div>
       ))}
+
       {lastReward && (
-        <div style={{ marginTop: "1rem", fontWeight: "bold" }}>
-          Letzter Reward: {lastReward}
-        </div>
+        <div className="belohnung">Letzter Reward: {lastReward}</div>
       )}
+
+      <div className="spieler-info">
+        <h3>Spieler 1 Ressourcen:</h3>
+        <p>{player1Ressourcen.filter(Boolean).join(", ") || "–"}</p>
+        <h3>Spieler 2 Ressourcen:</h3>
+        <p>{player2Ressourcen.filter(Boolean).join(", ") || "–"}</p>
+      </div>
     </div>
   );
 };
