@@ -5,10 +5,9 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
   const [kartenData, setKartenData] = useState([]);
   const [gezogen, setGezogen] = useState([]);
   const [lastReward, setLastReward] = useState(null);
-  const [activePlayer, setActivePlayer] = useState(1);
-
-  const [player1Ressourcen, setPlayer1Ressourcen] = useState([]);
-  const [player2Ressourcen, setPlayer2Ressourcen] = useState([]);
+  const [spielerAmZug, setSpielerAmZug] = useState(1);
+  const [ressourcenP1, setRessourcenP1] = useState([]);
+  const [ressourcenP2, setRessourcenP2] = useState([]);
 
   useEffect(() => {
     fetch("/grundspiel_karten_zeitalter_1.json")
@@ -21,21 +20,25 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
 
     const gezogeneKarte = kartenData[cardIndex];
     setGezogen([...gezogen, cardIndex]);
-    setLastReward(`${gezogeneKarte.produziert || "❌ nichts"} (Spieler ${activePlayer})`);
 
-    if (activePlayer === 1) {
-      setPlayer1Ressourcen([...player1Ressourcen, gezogeneKarte.produziert]);
-      setActivePlayer(2);
-    } else {
-      setPlayer2Ressourcen([...player2Ressourcen, gezogeneKarte.produziert]);
-      setActivePlayer(1);
+    // Belohnung zuweisen
+    const reward = gezogeneKarte.produziert || "❌ nichts";
+    setLastReward(`${reward} (Spieler ${spielerAmZug})`);
+
+    if (gezogeneKarte.produziert) {
+      if (spielerAmZug === 1) {
+        setRessourcenP1((prev) => [...prev, gezogeneKarte.produziert]);
+      } else {
+        setRessourcenP2((prev) => [...prev, gezogeneKarte.produziert]);
+      }
     }
+
+    // Nächster Spieler ist am Zug
+    setSpielerAmZug(spielerAmZug === 1 ? 2 : 1);
   };
 
   return (
     <div className="karten-auslage">
-      <h2>Aktiver Spieler: Spieler {activePlayer}</h2>
-
       {layout.map((reihe, rowIndex) => (
         <div key={rowIndex} className="reihe">
           {reihe.map((cardIndex, colIndex) => {
@@ -54,9 +57,7 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
                     {card.produziert.charAt(0)}
                   </div>
                 )}
-                <div className="kartenname">
-                  {card?.name ?? ""}
-                </div>
+                <div className="kartenname">{card?.name ?? ""}</div>
               </div>
             );
           })}
@@ -64,14 +65,17 @@ const KartenAuslageLayout = ({ layout, offenLayout }) => {
       ))}
 
       {lastReward && (
-        <div className="belohnung">Letzter Reward: {lastReward}</div>
+        <div style={{ marginTop: "1rem", fontWeight: "bold" }}>
+          Letzter Reward: {lastReward}
+        </div>
       )}
 
-      <div className="spieler-info">
+      <div style={{ marginTop: "2rem" }}>
         <h3>Spieler 1 Ressourcen:</h3>
-        <p>{player1Ressourcen.filter(Boolean).join(", ") || "–"}</p>
+        <p>{ressourcenP1.length > 0 ? ressourcenP1.join(", ") : "–"}</p>
+
         <h3>Spieler 2 Ressourcen:</h3>
-        <p>{player2Ressourcen.filter(Boolean).join(", ") || "–"}</p>
+        <p>{ressourcenP2.length > 0 ? ressourcenP2.join(", ") : "–"}</p>
       </div>
     </div>
   );
